@@ -1,0 +1,16 @@
+{
+  "name": "goinggoing",
+  "image": "mcr.microsoft.com/devcontainers/java:21",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vmware.vscode-boot-dev-pack"
+      ]
+    }
+  },
+  "forwardPorts": [
+    8080
+  ],
+  "postCreateCommand": "./gradlew test"
+}
