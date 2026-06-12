@@ -1,6 +1,6 @@
 Project goinggoing {
-  database_type: "PostgreSQL"
-  Note: "MVP schema for a destination-first travel curation service using Korea public tourism data."
+  database_type: "MySQL"
+  Note: "GoingGoing MVP schema for MariaDB. Main destination content, card carousel, saved routes, bookmarks, preferences, and Korea Tourism Organization public-data imports."
 }
 
 Enum user_role {
@@ -10,8 +10,8 @@ Enum user_role {
 
 Enum user_status {
   ACTIVE
-  DELETED
   SUSPENDED
+  DELETED
 }
 
 Enum content_type {
@@ -42,8 +42,10 @@ Enum route_status {
   HIDDEN
 }
 
-Enum bookmark_target_type {
-  CONTENT
+Enum sync_status {
+  SUCCESS
+  FAILED
+  PARTIAL
 }
 
 Table users {
@@ -51,8 +53,8 @@ Table users {
   email varchar(255) [not null, unique]
   password_hash varchar(255) [not null]
   nickname varchar(50) [not null]
-  role user_role [not null, default: "USER"]
-  status user_status [not null, default: "ACTIVE"]
+  role user_role [not null, default: 'USER']
+  status user_status [not null, default: 'ACTIVE']
   created_at timestamp [not null]
   updated_at timestamp [not null]
   deleted_at timestamp
@@ -60,7 +62,7 @@ Table users {
 
 Table refresh_tokens {
   id bigint [pk, increment]
-  user_id bigint [not null]
+  user_id bigint [not null, ref: > users.id]
   token varchar(512) [not null, unique]
   expires_at timestamp [not null]
   revoked_at timestamp
@@ -68,13 +70,14 @@ Table refresh_tokens {
 
   Indexes {
     user_id
+    expires_at
   }
 }
 
 Table regions {
   id bigint [pk, increment]
-  parent_id bigint
-  sido_code varchar(20)
+  parent_id bigint [ref: > regions.id]
+  area_code varchar(20)
   sigungu_code varchar(20)
   name varchar(100) [not null]
   full_name varchar(200) [not null]
@@ -84,7 +87,7 @@ Table regions {
 
   Indexes {
     parent_id
-    (sido_code, sigungu_code) [unique]
+    (area_code, sigungu_code) [unique]
   }
 }
 
@@ -99,7 +102,7 @@ Table themes {
 
 Table sub_themes {
   id bigint [pk, increment]
-  theme_id bigint [not null]
+  theme_id bigint [not null, ref: > themes.id]
   name varchar(100) [not null]
   description varchar(255)
   display_order int [not null, default: 0]
@@ -121,9 +124,9 @@ Table tags {
 
 Table contents {
   id bigint [pk, increment]
-  region_id bigint [not null]
-  theme_id bigint
-  sub_theme_id bigint
+  region_id bigint [not null, ref: > regions.id]
+  theme_id bigint [ref: > themes.id]
+  sub_theme_id bigint [ref: > sub_themes.id]
   title varchar(200) [not null]
   content_type content_type [not null]
   summary varchar(500)
@@ -151,15 +154,15 @@ Table contents {
     theme_id
     sub_theme_id
     content_type
-    external_content_id [unique]
     hot_score
     is_published
+    (source_type, external_content_id) [unique]
   }
 }
 
 Table content_cards {
   id bigint [pk, increment]
-  content_id bigint [not null]
+  content_id bigint [not null, ref: > contents.id]
   title varchar(200) [not null]
   body text [not null]
   image_url varchar(1000)
@@ -168,13 +171,14 @@ Table content_cards {
   updated_at timestamp [not null]
 
   Indexes {
+    content_id
     (content_id, display_order) [unique]
   }
 }
 
 Table content_tags {
-  content_id bigint [not null]
-  tag_id bigint [not null]
+  content_id bigint [not null, ref: > contents.id]
+  tag_id bigint [not null, ref: > tags.id]
 
   Indexes {
     (content_id, tag_id) [pk]
@@ -184,16 +188,25 @@ Table content_tags {
 
 Table user_preferences {
   id bigint [pk, increment]
-  user_id bigint [not null, unique]
-  preferred_region_id bigint
+  user_id bigint [not null, unique, ref: > users.id]
   preferred_trip_duration trip_duration_type
   created_at timestamp [not null]
   updated_at timestamp [not null]
 }
 
+Table user_preference_regions {
+  user_preference_id bigint [not null, ref: > user_preferences.id]
+  region_id bigint [not null, ref: > regions.id]
+
+  Indexes {
+    (user_preference_id, region_id) [pk]
+    region_id
+  }
+}
+
 Table user_preference_themes {
-  user_preference_id bigint [not null]
-  theme_id bigint [not null]
+  user_preference_id bigint [not null, ref: > user_preferences.id]
+  theme_id bigint [not null, ref: > themes.id]
 
   Indexes {
     (user_preference_id, theme_id) [pk]
@@ -202,8 +215,8 @@ Table user_preference_themes {
 }
 
 Table user_preference_tags {
-  user_preference_id bigint [not null]
-  tag_id bigint [not null]
+  user_preference_id bigint [not null, ref: > user_preferences.id]
+  tag_id bigint [not null, ref: > tags.id]
 
   Indexes {
     (user_preference_id, tag_id) [pk]
@@ -213,25 +226,25 @@ Table user_preference_tags {
 
 Table bookmarks {
   id bigint [pk, increment]
-  user_id bigint [not null]
-  target_type bookmark_target_type [not null, default: "CONTENT"]
-  content_id bigint [not null]
+  user_id bigint [not null, ref: > users.id]
+  content_id bigint [not null, ref: > contents.id]
   created_at timestamp [not null]
 
   Indexes {
-    (user_id, content_id) [unique]
+    user_id
     content_id
+    (user_id, content_id) [unique]
   }
 }
 
 Table routes {
   id bigint [pk, increment]
-  content_id bigint [not null]
+  content_id bigint [not null, ref: > contents.id]
+  theme_id bigint [ref: > themes.id]
   title varchar(200) [not null]
   summary varchar(500)
   trip_duration_type trip_duration_type [not null]
-  theme_id bigint
-  status route_status [not null, default: "DRAFT"]
+  status route_status [not null, default: 'DRAFT']
   total_distance_meters int
   total_duration_minutes int
   map_center_latitude decimal(10, 7)
@@ -243,23 +256,23 @@ Table routes {
 
   Indexes {
     content_id
-    trip_duration_type
     theme_id
+    trip_duration_type
     status
   }
 }
 
 Table route_places {
   id bigint [pk, increment]
-  route_id bigint [not null]
-  content_id bigint
+  route_id bigint [not null, ref: > routes.id]
+  content_id bigint [ref: > contents.id]
   name varchar(200) [not null]
   place_type content_type [not null]
   address varchar(500)
   latitude decimal(10, 7)
   longitude decimal(10, 7)
-  visit_order int [not null]
   day_number int [not null, default: 1]
+  visit_order int [not null]
   estimated_stay_minutes int
   move_minutes_from_previous int
   recommendation_note varchar(500)
@@ -267,23 +280,23 @@ Table route_places {
   updated_at timestamp [not null]
 
   Indexes {
-    (route_id, day_number, visit_order) [unique]
+    route_id
     content_id
+    (route_id, day_number, visit_order) [unique]
   }
 }
 
 Table related_places {
   id bigint [pk, increment]
-  base_content_id bigint [not null]
-  related_content_id bigint
+  base_content_id bigint [not null, ref: > contents.id]
+  related_content_id bigint [ref: > contents.id]
   name varchar(200) [not null]
   place_type content_type [not null]
-  rank int [not null]
+  related_rank int [not null]
   relation_score decimal(10, 2)
   address varchar(500)
   latitude decimal(10, 7)
   longitude decimal(10, 7)
-  source_type source_type [not null, default: "KTO_RELATED_ATTRACTION"]
   source_period varchar(20)
   raw_payload json
   created_at timestamp [not null]
@@ -292,32 +305,29 @@ Table related_places {
   Indexes {
     base_content_id
     related_content_id
-    (base_content_id, place_type, rank)
+    (base_content_id, place_type, related_rank)
   }
 }
 
-Table content_demand_metrics {
+Table regional_demand_metrics {
   id bigint [pk, increment]
-  content_id bigint
-  region_id bigint [not null]
+  region_id bigint [not null, ref: > regions.id]
   metric_month varchar(7) [not null]
   service_demand_score decimal(10, 2)
   cultural_resource_score decimal(10, 2)
   navigation_search_score decimal(10, 2)
-  source_type source_type [not null, default: "KTO_REGIONAL_DEMAND"]
   raw_payload json
   created_at timestamp [not null]
 
   Indexes {
-    content_id
     region_id
-    (region_id, metric_month)
+    (region_id, metric_month) [unique]
   }
 }
 
 Table search_logs {
   id bigint [pk, increment]
-  user_id bigint
+  user_id bigint [ref: > users.id]
   keyword varchar(200) [not null]
   result_count int [not null, default: 0]
   created_at timestamp [not null]
@@ -333,37 +343,10 @@ Table external_sync_logs {
   id bigint [pk, increment]
   source_type source_type [not null]
   endpoint varchar(255) [not null]
-  status varchar(50) [not null]
+  status sync_status [not null]
   requested_at timestamp [not null]
   completed_at timestamp
   imported_count int [not null, default: 0]
   failed_count int [not null, default: 0]
   message text
 }
-
-Ref: refresh_tokens.user_id > users.id
-Ref: regions.parent_id > regions.id
-Ref: sub_themes.theme_id > themes.id
-Ref: contents.region_id > regions.id
-Ref: contents.theme_id > themes.id
-Ref: contents.sub_theme_id > sub_themes.id
-Ref: content_cards.content_id > contents.id
-Ref: content_tags.content_id > contents.id
-Ref: content_tags.tag_id > tags.id
-Ref: user_preferences.user_id > users.id
-Ref: user_preferences.preferred_region_id > regions.id
-Ref: user_preference_themes.user_preference_id > user_preferences.id
-Ref: user_preference_themes.theme_id > themes.id
-Ref: user_preference_tags.user_preference_id > user_preferences.id
-Ref: user_preference_tags.tag_id > tags.id
-Ref: bookmarks.user_id > users.id
-Ref: bookmarks.content_id > contents.id
-Ref: routes.content_id > contents.id
-Ref: routes.theme_id > themes.id
-Ref: route_places.route_id > routes.id
-Ref: route_places.content_id > contents.id
-Ref: related_places.base_content_id > contents.id
-Ref: related_places.related_content_id > contents.id
-Ref: content_demand_metrics.content_id > contents.id
-Ref: content_demand_metrics.region_id > regions.id
-Ref: search_logs.user_id > users.id

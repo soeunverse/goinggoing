@@ -6,11 +6,30 @@ GoingGoing is a travel curation service for spontaneous users who want to choose
 
 ```text
 goinggoing/
-  backend source: src/main/java/com/goinggoing/goinggoing
-  frontend/      reserved for the web client
-  parser/        reserved for public-data ingestion and preprocessing
-  docs/          planning, API, and database design documents
+  src/main/java/com/goinggoing/goinggoing/
+    domain/         feature domains
+      content/
+        controller/
+        dto/
+        entity/
+        repository/
+        service/
+      route/
+      user/
+      auth/
+      bookmark/
+      recommendation/
+      category/
+      search/
+    infra/          external API and technical integration code
+      kto/
+    global/         shared config, exception, response, security, and utility code
+  frontend/         reserved for the web client
+  parser/           reserved for public-data ingestion and preprocessing
+  docs/             planning, API, and database design documents
 ```
+
+See `docs/architecture/package-structure.md` for package ownership rules.
 
 ## MVP Scope
 
