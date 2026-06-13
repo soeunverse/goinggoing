@@ -28,25 +28,31 @@ public class RouteService {
 	}
 
 	public RouteResponse generateRoute(RouteGenerateRequest request) {
+		// 기준 컨텐츠 검증
 		contentRepository.findPublishedContent(request.contentId())
 				.orElseThrow(() -> new BusinessException(ErrorCode.CONTENT_NOT_FOUND));
 
+		// 저장 루트 조회
 		Route route = routeRepository.findFirstByContentIdAndTripDurationType(
 						request.contentId(),
 						request.tripDurationType()
 				)
 				.orElseThrow(() -> new BusinessException(ErrorCode.ROUTE_NOT_FOUND));
 
+		// 루트 응답 생성
 		return toResponse(route);
 	}
 
 	public RouteResponse getRouteDetail(Long routeId) {
+		// 공개 루트 조회
 		Route route = routeRepository.findPublishedRoute(routeId)
 				.orElseThrow(() -> new BusinessException(ErrorCode.ROUTE_NOT_FOUND));
+		// 루트 응답 생성
 		return toResponse(route);
 	}
 
 	public List<RouteResponse> getRoutesByRegion(Long regionId) {
+		// 지역별 루트 목록 조회
 		return routeRepository.findPublishedRoutesByRegionId(regionId)
 				.stream()
 				.map(this::toResponse)
