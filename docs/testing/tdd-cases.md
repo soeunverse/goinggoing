@@ -87,7 +87,38 @@
 | --- | --- | --- | --- |
 | Malformed JSON | Request body is not readable | Client calls signup API | `400 Bad Request`, common failure response |
 
-## Phase 4. Category Lookup
+## Phase 4. Auth Session API
+
+### Target APIs
+
+- `POST /api/auth/login`
+- `POST /api/auth/refresh`
+- `POST /api/auth/logout`
+
+### Success Cases
+
+| Case | Given | When | Then |
+| --- | --- | --- | --- |
+| Login success | Registered active user and matching password | Client calls login API | `200 OK`, user id and token pair are returned |
+| Refresh success | Valid refresh token | Client calls refresh API | Old refresh token is revoked and a new token pair is returned |
+| Logout success | Valid refresh token | Client calls logout API | Refresh token is revoked and success response has no data |
+
+### Failure Cases
+
+| Case | Given | When | Then |
+| --- | --- | --- | --- |
+| Unknown email | Email is not registered | User logs in | `INVALID_LOGIN_CREDENTIALS` business exception |
+| Wrong password | Password does not match | User logs in | `INVALID_LOGIN_CREDENTIALS` business exception |
+| Invalid refresh token | Token is missing, unknown, expired, or revoked | Refresh or logout is requested | `INVALID_REFRESH_TOKEN` business exception |
+
+### Edge Cases
+
+| Case | Given | When | Then |
+| --- | --- | --- | --- |
+| Inactive user | User status is not `ACTIVE` | User logs in | `UNAUTHORIZED` business exception |
+| Token rotation | Refresh succeeds once | Old token is used again | Old token cannot be reused |
+
+## Phase 5. Category Lookup
 
 ### Target APIs
 
