@@ -53,4 +53,45 @@ public interface ContentRepository extends JpaRepository<Content, Long> {
 			ORDER BY content.hotScore DESC, content.bookmarkCount DESC, content.viewCount DESC, content.id ASC
 			""")
 	List<Content> findHotContents();
+
+	@Query("""
+			SELECT DISTINCT content
+			FROM Content content
+			LEFT JOIN FETCH content.region
+			LEFT JOIN FETCH content.theme
+			LEFT JOIN content.tags tag
+			WHERE content.published = true
+			  AND content.deletedAt IS NULL
+			  AND (
+			    LOWER(content.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+			    OR LOWER(content.summary) LIKE LOWER(CONCAT('%', :keyword, '%'))
+			    OR LOWER(content.address) LIKE LOWER(CONCAT('%', :keyword, '%'))
+			    OR LOWER(tag.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+			  )
+			ORDER BY content.hotScore DESC, content.id ASC
+			""")
+	List<Content> searchByKeyword(@Param("keyword") String keyword);
+
+	@Query("""
+			SELECT DISTINCT content
+			FROM Content content
+			LEFT JOIN FETCH content.region
+			LEFT JOIN FETCH content.theme
+			LEFT JOIN content.tags tag
+			WHERE content.published = true
+			  AND content.deletedAt IS NULL
+			  AND (:regionId IS NULL OR content.region.id = :regionId)
+			  AND (:themeId IS NULL OR content.theme.id = :themeId)
+			  AND (:subThemeId IS NULL OR content.subTheme.id = :subThemeId)
+			  AND (:contentType IS NULL OR content.contentType = :contentType)
+			  AND (:tagIds IS NULL OR tag.id IN :tagIds)
+			ORDER BY content.hotScore DESC, content.id ASC
+			""")
+	List<Content> searchByFilter(
+			@Param("regionId") Long regionId,
+			@Param("themeId") Long themeId,
+			@Param("subThemeId") Long subThemeId,
+			@Param("contentType") ContentType contentType,
+			@Param("tagIds") List<Long> tagIds
+	);
 }
