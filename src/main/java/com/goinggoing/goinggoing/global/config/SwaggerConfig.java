@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class OpenApiConfig {
+public class SwaggerConfig {
 
 	@Bean
 	public OpenAPI goinggoingOpenApi() {
@@ -23,7 +23,6 @@ public class OpenApiConfig {
 				.info(new Info()
 						.title("GoingGoing API")
 						.description("당일치기 및 1박 2일 여행 컨텐츠 추천 서비스 API")
-						.version("v1")
-						.license(new License().name("GoingGoing MVP")));
+						.version("v1"));
 	}
 }

@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/users")
-@Tag(name = "사용자", description = "사용자 내 정보 API")
+@Tag(name = "유저 정보", description = "사용자의 내 정보 API")
 public class UserProfileController {
 
 	private final UserProfileService userProfileService;
