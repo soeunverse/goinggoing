@@ -49,6 +49,10 @@ public class User {
 		return new User(id, email, passwordHash, nickname, status);
 	}
 
+	public User withStatus(UserStatus status) {
+		return new User(id, email, passwordHash, nickname, status);
+	}
+
 	public boolean hasId() {
 		return id != null;
 	}
