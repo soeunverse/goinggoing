@@ -207,21 +207,29 @@
 
 ### Target APIs
 
-- `GET /api/themes`
-- `GET /api/themes/{themeId}/sub-themes`
-- `GET /api/tags`
+- `GET /api/categories/regions`
+- `GET /api/categories/themes`
+- `GET /api/categories/themes/{themeId}/sub-themes`
+- `GET /api/categories/tags`
 
 ### Success Cases
 
-- Published theme list is returned in display order.
-- Sub-themes are returned only for the requested theme.
-- Tags are returned in display order.
+| Case | Given | When | Then |
+| --- | --- | --- | --- |
+| Region list | 시/도 단위 regions exist | Client calls region API | Public `200 OK`, regions are returned in display order |
+| Theme list | Themes exist | Client calls theme API | Public `200 OK`, themes with `contentCount=0` are returned in display order |
+| Sub-theme list | Theme has sub-themes | Client calls sub-theme API | Public `200 OK`, sub-themes are returned in display order |
+| Tag list | Tags exist | Client calls tag API | Public `200 OK`, tags are returned in display order |
 
 ### Failure Cases
 
-- Theme does not exist when requesting sub-themes.
+| Case | Given | When | Then |
+| --- | --- | --- | --- |
+| Theme does not exist | Theme id does not exist | Client calls sub-theme API | `404 Not Found`, `CATEGORY_NOT_FOUND` common failure response |
 
 ### Edge Cases
 
-- Empty result returns an empty list, not `null`.
-- Invalid path variable returns `400 Bad Request`.
+| Case | Given | When | Then |
+| --- | --- | --- | --- |
+| Empty result | No categories are saved | Client calls list API | Empty list is returned, not `null` |
+| MVP seed | Local seed SQL is executed | Developer tests category API | 전국 시/도, themes, sub-themes, tags are inserted idempotently |
