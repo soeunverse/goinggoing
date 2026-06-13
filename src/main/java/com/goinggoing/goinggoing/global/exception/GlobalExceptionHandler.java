@@ -3,6 +3,7 @@ package com.goinggoing.goinggoing.global.exception;
 import com.goinggoing.goinggoing.global.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
@@ -15,6 +16,15 @@ public class GlobalExceptionHandler {
 		return ResponseEntity
 				.status(errorCode.getStatus())
 				.body(ApiResponse.failure(errorCode, exception.getMessage()));
+	}
+
+	@ExceptionHandler(MissingRequestHeaderException.class)
+	public ResponseEntity<ApiResponse<Void>> handleMissingRequestHeader(MissingRequestHeaderException exception) {
+		// 인증 헤더 누락을 인증 실패 응답으로 변환
+		ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
+		return ResponseEntity
+				.status(errorCode.getStatus())
+				.body(ApiResponse.failure(errorCode));
 	}
 
 	@ExceptionHandler(Exception.class)

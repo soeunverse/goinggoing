@@ -184,6 +184,13 @@ class UserSignupServiceTest {
 		}
 
 		@Override
+		public Optional<User> findById(Long id) {
+			return users.values().stream()
+					.filter(user -> user.getId().equals(id))
+					.findFirst();
+		}
+
+		@Override
 		public User save(User user) {
 			User savedUser = user.hasId() ? user : user.withId(sequence++);
 			users.put(savedUser.getEmail(), savedUser);
