@@ -21,4 +21,15 @@ class DatabaseSeedFileTest {
 		assertThat(seedSql).contains("INSERT INTO sub_themes");
 		assertThat(seedSql).contains("INSERT INTO tags");
 	}
+
+	@Test
+	@DisplayName("MVP seed SQL은 컨텐츠, 카드뉴스, 태그 연결 샘플 데이터를 포함한다")
+	void seedFileContainsMvpContentData() throws Exception {
+		String seedSql = Files.readString(Path.of("docs/database/seed-mvp.sql"));
+
+		assertThat(seedSql).contains("INSERT INTO contents");
+		assertThat(seedSql).contains("성심당", "광안리 해수욕장");
+		assertThat(seedSql).contains("INSERT INTO content_cards");
+		assertThat(seedSql).contains("INSERT INTO content_tags");
+	}
 }
