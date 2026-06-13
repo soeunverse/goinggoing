@@ -41,12 +41,16 @@ public class SearchService {
 
 	@Transactional
 	public List<ContentSummaryResponse> searchByKeyword(String keyword, Long userId) {
+		// 검색어 정규화
 		String normalizedKeyword = normalizeKeyword(keyword);
+		// 키워드 검색 실행
 		List<Content> contents = contentRepository.searchByKeyword(normalizedKeyword);
 
+		// 검색 로그 저장
 		User user = findUserOrNull(userId);
 		searchLogRepository.save(SearchLog.create(user, normalizedKeyword, contents.size()));
 
+		// 검색 결과 응답 생성
 		return contents.stream()
 				.map(this::toSummaryResponse)
 				.toList();
@@ -54,7 +58,9 @@ public class SearchService {
 
 	@Transactional(readOnly = true)
 	public List<ContentSummaryResponse> searchByFilter(SearchFilterCondition condition) {
+		// 태그 조건 정리
 		List<Long> tagIds = condition.tagIds() == null || condition.tagIds().isEmpty() ? null : condition.tagIds();
+		// 필터 검색 실행
 		return contentRepository.searchByFilter(
 						condition.regionId(),
 						condition.themeId(),
@@ -69,12 +75,15 @@ public class SearchService {
 
 	@Transactional(readOnly = true)
 	public List<PopularSearchKeywordResponse> getPopularKeywords() {
+		// 인기 검색어 조회
 		return searchLogRepository.findPopularKeywords(KEYWORD_LIMIT);
 	}
 
 	@Transactional(readOnly = true)
 	public List<RecentSearchKeywordResponse> getRecentKeywords(Long userId) {
+		// 사용자 상태 검증
 		validateActiveUser(userId);
+		// 최근 검색어 조회
 		return searchLogRepository.findRecentKeywordsByUserId(userId, KEYWORD_LIMIT);
 	}
 
