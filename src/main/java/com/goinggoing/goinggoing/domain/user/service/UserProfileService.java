@@ -19,13 +19,16 @@ public class UserProfileService {
 	}
 
 	public UserProfileResponse getMyProfile(Long userId) {
+		// 사용자 ID로 계정 조회
 		User user = userRepository.findById(userId)
 				.orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
+		// 활성 계정 검증
 		if (!user.isActive()) {
 			throw new BusinessException(ErrorCode.UNAUTHORIZED);
 		}
 
+		// 내 정보 응답 생성
 		return new UserProfileResponse(
 				user.getId(),
 				user.getEmail(),
