@@ -32,4 +32,14 @@ class DatabaseSeedFileTest {
 		assertThat(seedSql).contains("INSERT INTO content_cards");
 		assertThat(seedSql).contains("INSERT INTO content_tags");
 	}
+
+	@Test
+	@DisplayName("MVP seed SQL은 루트와 루트 장소 샘플 데이터를 포함한다")
+	void seedFileContainsMvpRouteData() throws Exception {
+		String seedSql = Files.readString(Path.of("docs/database/seed-mvp.sql"));
+
+		assertThat(seedSql).contains("INSERT INTO routes");
+		assertThat(seedSql).contains("성심당 당일치기 루트", "광안리 1박 2일 루트");
+		assertThat(seedSql).contains("INSERT INTO route_places");
+	}
 }
