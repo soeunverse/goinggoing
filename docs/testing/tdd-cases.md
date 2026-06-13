@@ -118,7 +118,32 @@
 | Inactive user | User status is not `ACTIVE` | User logs in | `UNAUTHORIZED` business exception |
 | Token rotation | Refresh succeeds once | Old token is used again | Old token cannot be reused |
 
-## Phase 5. Category Lookup
+## Phase 5. User Profile Lookup API
+
+### Target API
+
+- `GET /api/users/me`
+
+### Success Cases
+
+| Case | Given | When | Then |
+| --- | --- | --- | --- |
+| Profile lookup success | `X-USER-ID` header points to an active user | Client calls my profile API | `200 OK`, user id/email/nickname/status are returned |
+
+### Failure Cases
+
+| Case | Given | When | Then |
+| --- | --- | --- | --- |
+| Missing user id header | `X-USER-ID` header is missing | Client calls my profile API | `401 Unauthorized`, `UNAUTHORIZED` common failure response |
+| User not found | Header user id does not exist | Client calls my profile API | `404 Not Found`, `USER_NOT_FOUND` common failure response |
+
+### Edge Cases
+
+| Case | Given | When | Then |
+| --- | --- | --- | --- |
+| Inactive user | User status is not `ACTIVE` | Client calls my profile API | `401 Unauthorized`, `UNAUTHORIZED` common failure response |
+
+## Phase 6. Category Lookup
 
 ### Target APIs
 
