@@ -7,6 +7,7 @@ import com.goinggoing.goinggoing.domain.user.service.UserPreferenceService;
 import com.goinggoing.goinggoing.global.exception.BusinessException;
 import com.goinggoing.goinggoing.global.exception.ErrorCode;
 import com.goinggoing.goinggoing.global.exception.GlobalExceptionHandler;
+import com.goinggoing.goinggoing.global.security.CurrentUserExtractor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -27,8 +28,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserPreferenceControllerTest {
 
 	private final UserPreferenceService userPreferenceService = mock(UserPreferenceService.class);
+	private final CurrentUserExtractor currentUserExtractor = mock(CurrentUserExtractor.class);
 	private final MockMvc mockMvc = MockMvcBuilders
-			.standaloneSetup(new UserPreferenceController(userPreferenceService))
+			.standaloneSetup(new UserPreferenceController(userPreferenceService, currentUserExtractor))
 			.setControllerAdvice(new GlobalExceptionHandler())
 			.build();
 
@@ -42,9 +44,10 @@ class UserPreferenceControllerTest {
 						List.of(10L),
 						List.of(100L)
 				));
+		when(currentUserExtractor.extractUserId("Bearer access-token")).thenReturn(1L);
 
 		mockMvc.perform(get("/api/users/me/preferences")
-						.header("X-USER-ID", "1"))
+						.header("Authorization", "Bearer access-token"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.success").value(true))
 				.andExpect(jsonPath("$.data.preferredTripDuration").value("DAY_TRIP"))
@@ -65,9 +68,10 @@ class UserPreferenceControllerTest {
 						List.of(11L, 12L),
 						List.of()
 				));
+		when(currentUserExtractor.extractUserId("Bearer access-token")).thenReturn(1L);
 
 		mockMvc.perform(put("/api/users/me/preferences")
-						.header("X-USER-ID", "1")
+						.header("Authorization", "Bearer access-token")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{
@@ -91,9 +95,10 @@ class UserPreferenceControllerTest {
 	void saveEmptyPreferenceFails() throws Exception {
 		when(userPreferenceService.saveMyPreference(any(Long.class), any(UserPreferenceRequest.class)))
 				.thenThrow(new BusinessException(ErrorCode.INVALID_PREFERENCE));
+		when(currentUserExtractor.extractUserId("Bearer access-token")).thenReturn(1L);
 
 		mockMvc.perform(put("/api/users/me/preferences")
-						.header("X-USER-ID", "1")
+						.header("Authorization", "Bearer access-token")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{
@@ -113,16 +118,17 @@ class UserPreferenceControllerTest {
 	void getMissingUserFails() throws Exception {
 		when(userPreferenceService.getMyPreference(999L))
 				.thenThrow(new BusinessException(ErrorCode.USER_NOT_FOUND));
+		when(currentUserExtractor.extractUserId("Bearer missing-user-token")).thenReturn(999L);
 
 		mockMvc.perform(get("/api/users/me/preferences")
-						.header("X-USER-ID", "999"))
+						.header("Authorization", "Bearer missing-user-token"))
 				.andExpect(status().isNotFound())
 				.andExpect(jsonPath("$.success").value(false))
 				.andExpect(jsonPath("$.errorCode").value("USER_NOT_FOUND"));
 	}
 
 	@Test
-	@DisplayName("X-USER-ID 헤더가 없으면 401과 UNAUTHORIZED 응답을 반환한다")
+	@DisplayName("Authorization 헤더가 없으면 401과 UNAUTHORIZED 응답을 반환한다")
 	void missingUserIdHeaderFails() throws Exception {
 		mockMvc.perform(get("/api/users/me/preferences"))
 				.andExpect(status().isUnauthorized())

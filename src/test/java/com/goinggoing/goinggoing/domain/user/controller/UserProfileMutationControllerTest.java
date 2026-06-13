@@ -7,6 +7,7 @@ import com.goinggoing.goinggoing.domain.user.service.UserProfileService;
 import com.goinggoing.goinggoing.global.exception.BusinessException;
 import com.goinggoing.goinggoing.global.exception.ErrorCode;
 import com.goinggoing.goinggoing.global.exception.GlobalExceptionHandler;
+import com.goinggoing.goinggoing.global.security.CurrentUserExtractor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -26,8 +27,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserProfileMutationControllerTest {
 
 	private final UserProfileService userProfileService = mock(UserProfileService.class);
+	private final CurrentUserExtractor currentUserExtractor = mock(CurrentUserExtractor.class);
 	private final MockMvc mockMvc = MockMvcBuilders
-			.standaloneSetup(new UserProfileController(userProfileService))
+			.standaloneSetup(new UserProfileController(userProfileService, currentUserExtractor))
 			.setControllerAdvice(new GlobalExceptionHandler())
 			.build();
 
@@ -36,9 +38,10 @@ class UserProfileMutationControllerTest {
 	void updateMyProfileSuccess() throws Exception {
 		when(userProfileService.updateMyProfile(any(Long.class), any(UserProfileUpdateRequest.class)))
 				.thenReturn(new UserProfileResponse(1L, "user@example.com", "새닉네임", UserStatus.ACTIVE));
+		when(currentUserExtractor.extractUserId("Bearer access-token")).thenReturn(1L);
 
 		mockMvc.perform(patch("/api/users/me")
-						.header("X-USER-ID", "1")
+						.header("Authorization", "Bearer access-token")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{
@@ -59,9 +62,10 @@ class UserProfileMutationControllerTest {
 	void invalidNicknameUpdateFails() throws Exception {
 		when(userProfileService.updateMyProfile(any(Long.class), any(UserProfileUpdateRequest.class)))
 				.thenThrow(new BusinessException(ErrorCode.INVALID_NICKNAME));
+		when(currentUserExtractor.extractUserId("Bearer access-token")).thenReturn(1L);
 
 		mockMvc.perform(patch("/api/users/me")
-						.header("X-USER-ID", "1")
+						.header("Authorization", "Bearer access-token")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{
@@ -78,9 +82,10 @@ class UserProfileMutationControllerTest {
 	void updateMissingUserFails() throws Exception {
 		when(userProfileService.updateMyProfile(any(Long.class), any(UserProfileUpdateRequest.class)))
 				.thenThrow(new BusinessException(ErrorCode.USER_NOT_FOUND));
+		when(currentUserExtractor.extractUserId("Bearer missing-user-token")).thenReturn(999L);
 
 		mockMvc.perform(patch("/api/users/me")
-						.header("X-USER-ID", "999")
+						.header("Authorization", "Bearer missing-user-token")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{
@@ -95,8 +100,10 @@ class UserProfileMutationControllerTest {
 	@Test
 	@DisplayName("회원 탈퇴 API 성공 시 200과 데이터 없는 성공 응답을 반환한다")
 	void withdrawSuccess() throws Exception {
+		when(currentUserExtractor.extractUserId("Bearer access-token")).thenReturn(1L);
+
 		mockMvc.perform(delete("/api/users/me")
-						.header("X-USER-ID", "1"))
+						.header("Authorization", "Bearer access-token"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.success").value(true))
 				.andExpect(jsonPath("$.data").value(nullValue()))
@@ -107,7 +114,7 @@ class UserProfileMutationControllerTest {
 	}
 
 	@Test
-	@DisplayName("회원 탈퇴에서 X-USER-ID 헤더가 없으면 401과 UNAUTHORIZED 응답을 반환한다")
+	@DisplayName("회원 탈퇴에서 Authorization 헤더가 없으면 401과 UNAUTHORIZED 응답을 반환한다")
 	void missingHeaderWithdrawFails() throws Exception {
 		mockMvc.perform(delete("/api/users/me"))
 				.andExpect(status().isUnauthorized())

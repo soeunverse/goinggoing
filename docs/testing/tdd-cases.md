@@ -128,13 +128,13 @@
 
 | Case | Given | When | Then |
 | --- | --- | --- | --- |
-| Profile lookup success | `X-USER-ID` header points to an active user | Client calls my profile API | `200 OK`, user id/email/nickname/status are returned |
+| Profile lookup success | `Authorization: Bearer {accessToken}` points to an active user | Client calls my profile API | `200 OK`, user id/email/nickname/status are returned |
 
 ### Failure Cases
 
 | Case | Given | When | Then |
 | --- | --- | --- | --- |
-| Missing user id header | `X-USER-ID` header is missing | Client calls my profile API | `401 Unauthorized`, `UNAUTHORIZED` common failure response |
+| Missing authorization header | `Authorization` header is missing | Client calls my profile API | `401 Unauthorized`, `UNAUTHORIZED` common failure response |
 | User not found | Header user id does not exist | Client calls my profile API | `404 Not Found`, `USER_NOT_FOUND` common failure response |
 
 ### Edge Cases
@@ -154,14 +154,14 @@
 
 | Case | Given | When | Then |
 | --- | --- | --- | --- |
-| Profile update success | `X-USER-ID` header points to an active user and nickname is valid | Client updates my profile | `200 OK`, updated user id/email/nickname/status are returned |
-| Withdraw success | `X-USER-ID` header points to an active user | Client withdraws account | User status becomes `DELETED` and response has no data |
+| Profile update success | `Authorization: Bearer {accessToken}` points to an active user and nickname is valid | Client updates my profile | `200 OK`, updated user id/email/nickname/status are returned |
+| Withdraw success | `Authorization: Bearer {accessToken}` points to an active user | Client withdraws account | User status becomes `DELETED` and response has no data |
 
 ### Failure Cases
 
 | Case | Given | When | Then |
 | --- | --- | --- | --- |
-| Missing user id header | `X-USER-ID` header is missing | Client updates or withdraws | `401 Unauthorized`, `UNAUTHORIZED` common failure response |
+| Missing authorization header | `Authorization` header is missing | Client updates or withdraws | `401 Unauthorized`, `UNAUTHORIZED` common failure response |
 | User not found | Header user id does not exist | Client updates or withdraws | `404 Not Found`, `USER_NOT_FOUND` common failure response |
 | Invalid nickname | Nickname is blank | Client updates my profile | `400 Bad Request`, `INVALID_NICKNAME` common failure response |
 
@@ -183,7 +183,7 @@
 
 | Case | Given | When | Then |
 | --- | --- | --- | --- |
-| Preference lookup success | `X-USER-ID` header points to an active user with saved preferences | Client calls preference lookup API | `200 OK`, preferred duration and selected region/theme/tag ids are returned |
+| Preference lookup success | `Authorization: Bearer {accessToken}` points to an active user with saved preferences | Client calls preference lookup API | `200 OK`, preferred duration and selected region/theme/tag ids are returned |
 | Empty preference lookup | Active user has no saved preferences yet | Client calls preference lookup API | `200 OK`, empty id lists and `null` duration are returned |
 | Preference upsert create | Active user has no saved preferences yet | Client saves preferences | New preference is saved and returned |
 | Preference upsert update | Active user already has preferences | Client saves preferences again | Existing preference is replaced and returned |
@@ -192,7 +192,7 @@
 
 | Case | Given | When | Then |
 | --- | --- | --- | --- |
-| Missing user id header | `X-USER-ID` header is missing | Client looks up or saves preferences | `401 Unauthorized`, `UNAUTHORIZED` common failure response |
+| Missing authorization header | `Authorization` header is missing | Client looks up or saves preferences | `401 Unauthorized`, `UNAUTHORIZED` common failure response |
 | User not found | Header user id does not exist | Client looks up or saves preferences | `404 Not Found`, `USER_NOT_FOUND` common failure response |
 | Empty preference request | Duration is null and all id lists are empty | Client saves preferences | `400 Bad Request`, `INVALID_PREFERENCE` common failure response |
 

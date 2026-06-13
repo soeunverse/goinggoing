@@ -11,7 +11,7 @@ import com.goinggoing.goinggoing.domain.user.entity.UserStatus;
 import com.goinggoing.goinggoing.domain.user.repository.UserRepository;
 import com.goinggoing.goinggoing.global.exception.BusinessException;
 import com.goinggoing.goinggoing.global.exception.ErrorCode;
-import com.goinggoing.goinggoing.global.security.AuthTokenGenerator;
+import com.goinggoing.goinggoing.global.security.AuthTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ class AuthSessionServiceTest {
 
 	private FakeUserRepository userRepository;
 	private FakeRefreshTokenRepository refreshTokenRepository;
-	private FixedAuthTokenGenerator tokenGenerator;
+	private FixedAuthTokenProvider tokenProvider;
 	private PasswordEncoder passwordEncoder;
 	private AuthSessionService authSessionService;
 
@@ -46,13 +46,13 @@ class AuthSessionServiceTest {
 	void setUp() {
 		userRepository = new FakeUserRepository();
 		refreshTokenRepository = new FakeRefreshTokenRepository();
-		tokenGenerator = new FixedAuthTokenGenerator();
+		tokenProvider = new FixedAuthTokenProvider();
 		passwordEncoder = new BCryptPasswordEncoder();
 		authSessionService = new AuthSessionService(
 				userRepository,
 				refreshTokenRepository,
 				passwordEncoder,
-				tokenGenerator,
+				tokenProvider,
 				FIXED_CLOCK
 		);
 	}
@@ -229,18 +229,23 @@ class AuthSessionServiceTest {
 		}
 	}
 
-	private static class FixedAuthTokenGenerator implements AuthTokenGenerator {
+	private static class FixedAuthTokenProvider implements AuthTokenProvider {
 
 		private int sequence = 1;
 
 		@Override
-		public String generateAccessToken() {
-			return "access-" + sequence;
+		public String generateAccessToken(Long userId, LocalDateTime expiresAt) {
+			return "access-" + userId + "-" + expiresAt.toLocalDate() + "-" + sequence;
 		}
 
 		@Override
 		public String generateRefreshToken() {
 			return "refresh-" + sequence++;
+		}
+
+		@Override
+		public Long extractUserId(String accessToken) {
+			return 1L;
 		}
 	}
 }
