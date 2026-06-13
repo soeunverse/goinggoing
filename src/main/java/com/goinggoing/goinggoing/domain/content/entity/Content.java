@@ -87,7 +87,7 @@ public class Content {
 	@Column(name = "deleted_at")
 	private LocalDateTime deletedAt;
 
-	@OneToMany(mappedBy = "content")
+	@OneToMany(mappedBy = "content", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
 	@OrderBy("displayOrder ASC, id ASC")
 	private List<ContentCard> cards = new ArrayList<>();
 
@@ -139,6 +139,68 @@ public class Content {
 		this.published = published;
 	}
 
+	public static Content createAdminContent(
+			Region region,
+			Theme theme,
+			SubTheme subTheme,
+			String title,
+			ContentType contentType,
+			String summary,
+			String description,
+			String address,
+			BigDecimal latitude,
+			BigDecimal longitude,
+			String thumbnailUrl,
+			boolean published
+	) {
+		return new Content(
+				null,
+				region,
+				theme,
+				subTheme,
+				title,
+				contentType,
+				summary,
+				description,
+				address,
+				latitude,
+				longitude,
+				thumbnailUrl,
+				0L,
+				0L,
+				BigDecimal.ZERO,
+				published
+		);
+	}
+
+	public void update(
+			Region region,
+			Theme theme,
+			SubTheme subTheme,
+			String title,
+			ContentType contentType,
+			String summary,
+			String description,
+			String address,
+			BigDecimal latitude,
+			BigDecimal longitude,
+			String thumbnailUrl,
+			boolean published
+	) {
+		this.region = region;
+		this.theme = theme;
+		this.subTheme = subTheme;
+		this.title = title;
+		this.contentType = contentType;
+		this.summary = summary;
+		this.description = description;
+		this.address = address;
+		this.latitude = latitude;
+		this.longitude = longitude;
+		this.thumbnailUrl = thumbnailUrl;
+		this.published = published;
+	}
+
 	public void increaseViewCount() {
 		this.viewCount += 1;
 		this.hotScore = this.hotScore.add(BigDecimal.ONE);
@@ -161,6 +223,21 @@ public class Content {
 
 	public void addTag(Tag tag) {
 		this.tags.add(tag);
+	}
+
+	public void replaceCards(List<ContentCard> cards) {
+		this.cards.clear();
+		this.cards.addAll(cards);
+	}
+
+	public void replaceTags(List<Tag> tags) {
+		this.tags.clear();
+		this.tags.addAll(tags);
+	}
+
+	public void softDelete(LocalDateTime deletedAt) {
+		this.published = false;
+		this.deletedAt = deletedAt;
 	}
 
 	public Long getId() {
@@ -221,6 +298,14 @@ public class Content {
 
 	public BigDecimal getHotScore() {
 		return hotScore;
+	}
+
+	public boolean isPublished() {
+		return published;
+	}
+
+	public LocalDateTime getDeletedAt() {
+		return deletedAt;
 	}
 
 	public List<ContentCard> getCards() {

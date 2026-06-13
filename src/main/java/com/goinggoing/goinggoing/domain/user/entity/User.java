@@ -28,29 +28,38 @@ public class User {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
+	private UserRole role;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
 	private UserStatus status;
 
 	protected User() {
 	}
 
-	private User(Long id, String email, String passwordHash, String nickname, UserStatus status) {
+	private User(Long id, String email, String passwordHash, String nickname, UserRole role, UserStatus status) {
 		this.id = id;
 		this.email = email;
 		this.passwordHash = passwordHash;
 		this.nickname = nickname;
+		this.role = role;
 		this.status = status;
 	}
 
 	public static User create(String email, String passwordHash, String nickname) {
-		return new User(null, email, passwordHash, nickname, UserStatus.ACTIVE);
+		return new User(null, email, passwordHash, nickname, UserRole.USER, UserStatus.ACTIVE);
 	}
 
 	public User withId(Long id) {
-		return new User(id, email, passwordHash, nickname, status);
+		return new User(id, email, passwordHash, nickname, role, status);
+	}
+
+	public User withRole(UserRole role) {
+		return new User(id, email, passwordHash, nickname, role, status);
 	}
 
 	public User withStatus(UserStatus status) {
-		return new User(id, email, passwordHash, nickname, status);
+		return new User(id, email, passwordHash, nickname, role, status);
 	}
 
 	public void updateNickname(String nickname) {
@@ -69,6 +78,10 @@ public class User {
 		return status == UserStatus.ACTIVE;
 	}
 
+	public boolean isAdmin() {
+		return role == UserRole.ADMIN;
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -83,6 +96,10 @@ public class User {
 
 	public String getNickname() {
 		return nickname;
+	}
+
+	public UserRole getRole() {
+		return role;
 	}
 
 	public UserStatus getStatus() {
