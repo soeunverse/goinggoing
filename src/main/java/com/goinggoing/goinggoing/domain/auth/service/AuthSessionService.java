@@ -47,13 +47,16 @@ public class AuthSessionService {
 	}
 
 	public AuthTokenResponse login(LoginRequest request) {
+		// 이메일로 사용자 조회
 		User user = userRepository.findByEmail(request.email())
 				.orElseThrow(() -> new BusinessException(ErrorCode.INVALID_LOGIN_CREDENTIALS));
 
+		// 비밀번호 검증
 		if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
 			throw new BusinessException(ErrorCode.INVALID_LOGIN_CREDENTIALS);
 		}
 
+		// 활성 계정 검증
 		if (!user.isActive()) {
 			throw new BusinessException(ErrorCode.UNAUTHORIZED);
 		}
@@ -62,20 +65,26 @@ public class AuthSessionService {
 	}
 
 	public AuthTokenResponse refresh(RefreshTokenRequest request) {
+		// refresh token 유효성 검증
 		RefreshToken refreshToken = findAvailableRefreshToken(request.refreshToken());
+		// 기존 refresh token 폐기
 		refreshToken.revoke(now());
 
 		return issueTokenPair(refreshToken.getUser());
 	}
 
 	public void logout(LogoutRequest request) {
+		// 로그아웃 대상 refresh token 검증
 		RefreshToken refreshToken = findAvailableRefreshToken(request.refreshToken());
+		// refresh token 폐기 처리
 		refreshToken.revoke(now());
 	}
 
 	private AuthTokenResponse issueTokenPair(User user) {
+		// access token 및 refresh token 생성
 		String accessToken = authTokenGenerator.generateAccessToken();
 		String refreshToken = authTokenGenerator.generateRefreshToken();
+		// refresh token 저장
 		refreshTokenRepository.save(RefreshToken.issue(user, refreshToken, now().plusDays(REFRESH_TOKEN_EXPIRES_IN_DAYS)));
 
 		return new AuthTokenResponse(
@@ -88,9 +97,11 @@ public class AuthSessionService {
 	}
 
 	private RefreshToken findAvailableRefreshToken(String token) {
+		// refresh token 조회
 		RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
 				.orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN));
 
+		// 만료 및 폐기 여부 검증
 		if (!refreshToken.isAvailable(now())) {
 			throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
 		}
