@@ -31,7 +31,37 @@
 | Custom failure message | Client-facing message needs override | `ApiResponse.failure(errorCode, message)` | default message is overridden |
 | Unexpected exception | Unknown server error occurs | global handler receives exception | response uses `INTERNAL_SERVER_ERROR` |
 
-## Phase 2. Category Lookup
+## Phase 2. User Signup
+
+### Target API
+
+- `POST /api/auth/signup`
+
+### Success Cases
+
+| Case | Given | When | Then |
+| --- | --- | --- | --- |
+| Signup success | New email, valid password, nickname | User signs up | User is saved as `ACTIVE` and response contains user id/email/nickname |
+| Password encoding | Valid signup request | User is saved | Saved password is not raw text and password encoder can match it |
+
+### Failure Cases
+
+| Case | Given | When | Then |
+| --- | --- | --- | --- |
+| Duplicate email | Email already exists | User signs up | `EMAIL_ALREADY_EXISTS` business exception |
+| Short password | Password length is less than 8 | User signs up | `INVALID_PASSWORD` business exception |
+| Password without alphabet | Password has numbers only | User signs up | `INVALID_PASSWORD` business exception |
+| Password without number | Password has alphabets only | User signs up | `INVALID_PASSWORD` business exception |
+| Blank nickname | Nickname is blank | User signs up | `INVALID_NICKNAME` business exception |
+
+### Edge Cases
+
+| Case | Given | When | Then |
+| --- | --- | --- | --- |
+| Nickname duplicate | Same nickname exists | User signs up | Signup succeeds because nickname duplication is allowed |
+| Password length max | Password is longer than 100 characters | User signs up | `INVALID_PASSWORD` business exception |
+
+## Phase 3. Category Lookup
 
 ### Target APIs
 
