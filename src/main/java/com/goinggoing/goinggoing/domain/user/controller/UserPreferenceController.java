@@ -4,6 +4,7 @@ import com.goinggoing.goinggoing.domain.user.dto.UserPreferenceRequest;
 import com.goinggoing.goinggoing.domain.user.dto.UserPreferenceResponse;
 import com.goinggoing.goinggoing.domain.user.service.UserPreferenceService;
 import com.goinggoing.goinggoing.global.response.ApiResponse;
+import com.goinggoing.goinggoing.global.security.CurrentUserExtractor;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,9 +26,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserPreferenceController {
 
 	private final UserPreferenceService userPreferenceService;
+	private final CurrentUserExtractor currentUserExtractor;
 
-	public UserPreferenceController(UserPreferenceService userPreferenceService) {
+	public UserPreferenceController(UserPreferenceService userPreferenceService, CurrentUserExtractor currentUserExtractor) {
 		this.userPreferenceService = userPreferenceService;
+		this.currentUserExtractor = currentUserExtractor;
 	}
 
 	@GetMapping
@@ -70,10 +73,11 @@ public class UserPreferenceController {
 			)
 	})
 	public ResponseEntity<ApiResponse<UserPreferenceResponse>> getMyPreference(
-			@Parameter(description = "로그인 사용자 ID", required = true, example = "1")
-			@RequestHeader("X-USER-ID") Long userId
+			@Parameter(description = "Bearer access token", required = true, example = "Bearer access-token")
+			@RequestHeader("Authorization") String authorizationHeader
 	) {
 		// 온보딩 취향 조회 처리
+		Long userId = currentUserExtractor.extractUserId(authorizationHeader);
 		UserPreferenceResponse response = userPreferenceService.getMyPreference(userId);
 		// 취향 조회 응답 반환
 		return ResponseEntity.ok(ApiResponse.success(response, "온보딩 취향 조회가 완료되었습니다."));
@@ -129,11 +133,12 @@ public class UserPreferenceController {
 			)
 	})
 	public ResponseEntity<ApiResponse<UserPreferenceResponse>> saveMyPreference(
-			@Parameter(description = "로그인 사용자 ID", required = true, example = "1")
-			@RequestHeader("X-USER-ID") Long userId,
+			@Parameter(description = "Bearer access token", required = true, example = "Bearer access-token")
+			@RequestHeader("Authorization") String authorizationHeader,
 			@RequestBody UserPreferenceRequest request
 	) {
 		// 온보딩 취향 저장 처리
+		Long userId = currentUserExtractor.extractUserId(authorizationHeader);
 		UserPreferenceResponse response = userPreferenceService.saveMyPreference(userId, request);
 		// 취향 저장 응답 반환
 		return ResponseEntity.ok(ApiResponse.success(response, "온보딩 취향 저장이 완료되었습니다."));

@@ -22,7 +22,7 @@ class JwtAuthTokenProviderTest {
 	@Test
 	@DisplayName("JWT access token에서 사용자 ID를 추출한다")
 	void extractUserIdFromAccessToken() {
-		LocalDateTime expiresAt = LocalDateTime.ofInstant(Instant.parse("2026-06-13T01:00:00Z"), ZONE_ID);
+		LocalDateTime expiresAt = LocalDateTime.ofInstant(Instant.parse("2099-06-13T01:00:00Z"), ZONE_ID);
 		String accessToken = jwtAuthTokenProvider.generateAccessToken(1L, expiresAt);
 
 		Long userId = jwtAuthTokenProvider.extractUserId(accessToken);

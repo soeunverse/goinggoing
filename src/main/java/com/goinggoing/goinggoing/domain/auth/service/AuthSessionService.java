@@ -10,7 +10,8 @@ import com.goinggoing.goinggoing.domain.user.entity.User;
 import com.goinggoing.goinggoing.domain.user.repository.UserRepository;
 import com.goinggoing.goinggoing.global.exception.BusinessException;
 import com.goinggoing.goinggoing.global.exception.ErrorCode;
-import com.goinggoing.goinggoing.global.security.AuthTokenGenerator;
+import com.goinggoing.goinggoing.global.security.AuthTokenProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,27 +24,30 @@ import java.time.LocalDateTime;
 public class AuthSessionService {
 
 	private static final String TOKEN_TYPE = "Bearer";
-	private static final long ACCESS_TOKEN_EXPIRES_IN_SECONDS = 3600L;
-	private static final long REFRESH_TOKEN_EXPIRES_IN_DAYS = 14L;
-
 	private final UserRepository userRepository;
 	private final RefreshTokenRepository refreshTokenRepository;
 	private final PasswordEncoder passwordEncoder;
-	private final AuthTokenGenerator authTokenGenerator;
+	private final AuthTokenProvider authTokenProvider;
 	private final Clock clock;
+	private final long accessTokenExpiresInSeconds;
+	private final long refreshTokenExpiresInDays;
 
 	public AuthSessionService(
 			UserRepository userRepository,
 			RefreshTokenRepository refreshTokenRepository,
 			PasswordEncoder passwordEncoder,
-			AuthTokenGenerator authTokenGenerator,
-			Clock clock
+			AuthTokenProvider authTokenProvider,
+			Clock clock,
+			@Value("${auth.token.access-token-expires-in-seconds:3600}") long accessTokenExpiresInSeconds,
+			@Value("${auth.token.refresh-token-expires-in-days:14}") long refreshTokenExpiresInDays
 	) {
 		this.userRepository = userRepository;
 		this.refreshTokenRepository = refreshTokenRepository;
 		this.passwordEncoder = passwordEncoder;
-		this.authTokenGenerator = authTokenGenerator;
+		this.authTokenProvider = authTokenProvider;
 		this.clock = clock;
+		this.accessTokenExpiresInSeconds = accessTokenExpiresInSeconds;
+		this.refreshTokenExpiresInDays = refreshTokenExpiresInDays;
 	}
 
 	public AuthTokenResponse login(LoginRequest request) {
@@ -82,17 +86,17 @@ public class AuthSessionService {
 
 	private AuthTokenResponse issueTokenPair(User user) {
 		// access token 및 refresh token 생성
-		String accessToken = authTokenGenerator.generateAccessToken();
-		String refreshToken = authTokenGenerator.generateRefreshToken();
+		String accessToken = authTokenProvider.generateAccessToken(user.getId(), now().plusSeconds(accessTokenExpiresInSeconds));
+		String refreshToken = authTokenProvider.generateRefreshToken();
 		// refresh token 저장
-		refreshTokenRepository.save(RefreshToken.issue(user, refreshToken, now().plusDays(REFRESH_TOKEN_EXPIRES_IN_DAYS)));
+		refreshTokenRepository.save(RefreshToken.issue(user, refreshToken, now().plusDays(refreshTokenExpiresInDays)));
 
 		return new AuthTokenResponse(
 				user.getId(),
 				accessToken,
 				refreshToken,
 				TOKEN_TYPE,
-				ACCESS_TOKEN_EXPIRES_IN_SECONDS
+				accessTokenExpiresInSeconds
 		);
 	}
 

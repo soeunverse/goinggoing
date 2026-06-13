@@ -53,7 +53,9 @@ class AuthSessionServiceTest {
 				refreshTokenRepository,
 				passwordEncoder,
 				tokenProvider,
-				FIXED_CLOCK
+				FIXED_CLOCK,
+				3600L,
+				14L
 		);
 	}
 
@@ -65,7 +67,7 @@ class AuthSessionServiceTest {
 		AuthTokenResponse response = authSessionService.login(new LoginRequest("user@example.com", "password123"));
 
 		assertThat(response.userId()).isEqualTo(user.getId());
-		assertThat(response.accessToken()).isEqualTo("access-1");
+		assertThat(response.accessToken()).isEqualTo("access-1-2026-06-13-1");
 		assertThat(response.refreshToken()).isEqualTo("refresh-1");
 		assertThat(response.tokenType()).isEqualTo("Bearer");
 		assertThat(response.accessTokenExpiresInSeconds()).isEqualTo(3600L);
@@ -108,7 +110,7 @@ class AuthSessionServiceTest {
 
 		AuthTokenResponse response = authSessionService.refresh(new RefreshTokenRequest("refresh-old"));
 
-		assertThat(response.accessToken()).isEqualTo("access-1");
+		assertThat(response.accessToken()).isEqualTo("access-1-2026-06-13-1");
 		assertThat(response.refreshToken()).isEqualTo("refresh-1");
 		assertThat(oldToken.isRevoked()).isTrue();
 		assertThat(refreshTokenRepository.findByToken("refresh-1")).isPresent();

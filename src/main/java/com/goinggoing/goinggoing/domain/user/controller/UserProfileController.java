@@ -4,6 +4,7 @@ import com.goinggoing.goinggoing.domain.user.dto.UserProfileResponse;
 import com.goinggoing.goinggoing.domain.user.dto.UserProfileUpdateRequest;
 import com.goinggoing.goinggoing.domain.user.service.UserProfileService;
 import com.goinggoing.goinggoing.global.response.ApiResponse;
+import com.goinggoing.goinggoing.global.security.CurrentUserExtractor;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,9 +27,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserProfileController {
 
 	private final UserProfileService userProfileService;
+	private final CurrentUserExtractor currentUserExtractor;
 
-	public UserProfileController(UserProfileService userProfileService) {
+	public UserProfileController(UserProfileService userProfileService, CurrentUserExtractor currentUserExtractor) {
 		this.userProfileService = userProfileService;
+		this.currentUserExtractor = currentUserExtractor;
 	}
 
 	@GetMapping("/me")
@@ -71,10 +74,11 @@ public class UserProfileController {
 			)
 	})
 	public ResponseEntity<ApiResponse<UserProfileResponse>> getMyProfile(
-			@Parameter(description = "로그인 사용자 ID", required = true, example = "1")
-			@RequestHeader("X-USER-ID") Long userId
+			@Parameter(description = "Bearer access token", required = true, example = "Bearer access-token")
+			@RequestHeader("Authorization") String authorizationHeader
 	) {
 		// 내 정보 조회 처리
+		Long userId = currentUserExtractor.extractUserId(authorizationHeader);
 		UserProfileResponse response = userProfileService.getMyProfile(userId);
 		// 내 정보 응답 반환
 		return ResponseEntity.ok(ApiResponse.success(response, "내 정보 조회가 완료되었습니다."));
@@ -130,11 +134,12 @@ public class UserProfileController {
 			)
 	})
 	public ResponseEntity<ApiResponse<UserProfileResponse>> updateMyProfile(
-			@Parameter(description = "로그인 사용자 ID", required = true, example = "1")
-			@RequestHeader("X-USER-ID") Long userId,
+			@Parameter(description = "Bearer access token", required = true, example = "Bearer access-token")
+			@RequestHeader("Authorization") String authorizationHeader,
 			@RequestBody UserProfileUpdateRequest request
 	) {
 		// 내 정보 수정 처리
+		Long userId = currentUserExtractor.extractUserId(authorizationHeader);
 		UserProfileResponse response = userProfileService.updateMyProfile(userId, request);
 		// 수정 결과 응답 반환
 		return ResponseEntity.ok(ApiResponse.success(response, "내 정보 수정이 완료되었습니다."));
@@ -175,10 +180,11 @@ public class UserProfileController {
 			)
 	})
 	public ResponseEntity<ApiResponse<Void>> withdraw(
-			@Parameter(description = "로그인 사용자 ID", required = true, example = "1")
-			@RequestHeader("X-USER-ID") Long userId
+			@Parameter(description = "Bearer access token", required = true, example = "Bearer access-token")
+			@RequestHeader("Authorization") String authorizationHeader
 	) {
 		// 회원 탈퇴 처리
+		Long userId = currentUserExtractor.extractUserId(authorizationHeader);
 		userProfileService.withdraw(userId);
 		// 탈퇴 완료 응답 반환
 		return ResponseEntity.ok(ApiResponse.success(null, "회원 탈퇴가 완료되었습니다."));
