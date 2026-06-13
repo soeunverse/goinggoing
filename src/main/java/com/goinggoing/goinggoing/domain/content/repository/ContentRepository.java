@@ -94,4 +94,71 @@ public interface ContentRepository extends JpaRepository<Content, Long> {
 			@Param("contentType") ContentType contentType,
 			@Param("tagIds") List<Long> tagIds
 	);
+
+	@Query("""
+			SELECT DISTINCT content
+			FROM Content content
+			LEFT JOIN FETCH content.region
+			LEFT JOIN FETCH content.theme
+			LEFT JOIN content.tags tag
+			WHERE content.published = true
+			  AND content.deletedAt IS NULL
+			  AND (
+			    content.region.id IN :regionIds
+			    OR content.theme.id IN :themeIds
+			    OR tag.id IN :tagIds
+			  )
+			ORDER BY content.hotScore DESC, content.bookmarkCount DESC, content.viewCount DESC, content.id ASC
+			""")
+	List<Content> findRecommendedFeed(
+			@Param("regionIds") List<Long> regionIds,
+			@Param("themeIds") List<Long> themeIds,
+			@Param("tagIds") List<Long> tagIds
+	);
+
+	@Query("""
+			SELECT DISTINCT content
+			FROM Content content
+			LEFT JOIN FETCH content.region
+			LEFT JOIN FETCH content.theme
+			LEFT JOIN content.tags tag
+			WHERE content.published = true
+			  AND content.deletedAt IS NULL
+			  AND content.id <> :contentId
+			  AND (
+			    content.region.id = :regionId
+			    OR content.theme.id = :themeId
+			    OR tag.id IN :tagIds
+			  )
+			ORDER BY content.hotScore DESC, content.bookmarkCount DESC, content.viewCount DESC, content.id ASC
+			""")
+	List<Content> findRelatedContents(
+			@Param("contentId") Long contentId,
+			@Param("regionId") Long regionId,
+			@Param("themeId") Long themeId,
+			@Param("tagIds") List<Long> tagIds
+	);
+
+	@Query("""
+			SELECT DISTINCT content
+			FROM Content content
+			LEFT JOIN FETCH content.region
+			LEFT JOIN FETCH content.theme
+			LEFT JOIN content.tags tag
+			WHERE content.published = true
+			  AND content.deletedAt IS NULL
+			  AND (:regionId IS NULL OR content.region.id = :regionId)
+			  AND (:themeId IS NULL OR content.theme.id = :themeId)
+			  AND (:subThemeId IS NULL OR content.subTheme.id = :subThemeId)
+			  AND (:contentType IS NULL OR content.contentType = :contentType)
+			  AND (:tagIds IS NULL OR tag.id IN :tagIds)
+			ORDER BY function('RAND')
+			""")
+	List<Content> findRouletteCandidates(
+			@Param("regionId") Long regionId,
+			@Param("themeId") Long themeId,
+			@Param("subThemeId") Long subThemeId,
+			@Param("contentType") ContentType contentType,
+			@Param("tagIds") List<Long> tagIds
+	);
 }

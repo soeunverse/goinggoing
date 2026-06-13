@@ -2,6 +2,7 @@ package com.goinggoing.goinggoing.domain.recommendation.service;
 
 import com.goinggoing.goinggoing.domain.category.entity.Region;
 import com.goinggoing.goinggoing.domain.category.entity.SubTheme;
+import com.goinggoing.goinggoing.domain.category.entity.Tag;
 import com.goinggoing.goinggoing.domain.category.entity.Theme;
 import com.goinggoing.goinggoing.domain.content.dto.ContentSummaryResponse;
 import com.goinggoing.goinggoing.domain.content.entity.Content;
@@ -96,7 +97,7 @@ class RecommendationServiceTest {
 		Region region = new Region(regionId, "3", regionId == 3L ? "대전" : "부산", "지역", 1);
 		Theme theme = new Theme(themeId, themeId == 1L ? "맛집" : "자연/바다", "테마", 1);
 		SubTheme subTheme = new SubTheme(1L, theme, "빵지순례", "유명 빵집", 1);
-		return new Content(
+		Content content = new Content(
 				1L,
 				region,
 				theme,
@@ -114,5 +115,7 @@ class RecommendationServiceTest {
 				new BigDecimal("150.00"),
 				true
 		);
+		content.addTag(new Tag(1L, "빵지순례", 1));
+		return content;
 	}
 }
