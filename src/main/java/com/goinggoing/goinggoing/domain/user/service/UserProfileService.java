@@ -40,17 +40,23 @@ public class UserProfileService {
 
 	@Transactional
 	public UserProfileResponse updateMyProfile(Long userId, UserProfileUpdateRequest request) {
+		// 닉네임 형식 검증
 		validateNickname(request.nickname());
+		// 수정 대상 사용자 조회
 		User user = getActiveUser(userId);
 
+		// 닉네임 변경
 		user.updateNickname(request.nickname().trim());
 
+		// 수정 결과 응답 생성
 		return toProfileResponse(user);
 	}
 
 	@Transactional
 	public void withdraw(Long userId) {
+		// 탈퇴 대상 사용자 조회
 		User user = getActiveUser(userId);
+		// soft delete 처리
 		user.withdraw();
 	}
 
