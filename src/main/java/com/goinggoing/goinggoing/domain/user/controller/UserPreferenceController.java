@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +36,7 @@ public class UserPreferenceController {
 
 	@GetMapping
 	@Operation(summary = "온보딩 취향 조회", description = "로그인 사용자의 저장된 온보딩 취향을 조회합니다.")
+	@SecurityRequirement(name = "bearerAuth")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(
 					responseCode = "200",
@@ -73,7 +75,7 @@ public class UserPreferenceController {
 			)
 	})
 	public ResponseEntity<ApiResponse<UserPreferenceResponse>> getMyPreference(
-			@Parameter(description = "Bearer access token", required = true, example = "Bearer access-token")
+			@Parameter(hidden = true)
 			@RequestHeader("Authorization") String authorizationHeader
 	) {
 		// 온보딩 취향 조회 처리
@@ -85,6 +87,7 @@ public class UserPreferenceController {
 
 	@PutMapping
 	@Operation(summary = "온보딩 취향 저장", description = "로그인 사용자의 온보딩 취향을 생성하거나 기존 취향을 교체합니다.")
+	@SecurityRequirement(name = "bearerAuth")
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(
 			description = "온보딩 취향 저장 요청 정보",
 			required = true,
@@ -133,7 +136,7 @@ public class UserPreferenceController {
 			)
 	})
 	public ResponseEntity<ApiResponse<UserPreferenceResponse>> saveMyPreference(
-			@Parameter(description = "Bearer access token", required = true, example = "Bearer access-token")
+			@Parameter(hidden = true)
 			@RequestHeader("Authorization") String authorizationHeader,
 			@RequestBody UserPreferenceRequest request
 	) {

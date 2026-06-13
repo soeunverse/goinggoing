@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,6 +37,7 @@ public class UserProfileController {
 
 	@GetMapping("/me")
 	@Operation(summary = "내 정보 조회", description = "로그인 사용자의 이메일, 닉네임, 상태 정보를 조회합니다.")
+	@SecurityRequirement(name = "bearerAuth")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(
 					responseCode = "200",
@@ -74,7 +76,7 @@ public class UserProfileController {
 			)
 	})
 	public ResponseEntity<ApiResponse<UserProfileResponse>> getMyProfile(
-			@Parameter(description = "Bearer access token", required = true, example = "Bearer access-token")
+			@Parameter(hidden = true)
 			@RequestHeader("Authorization") String authorizationHeader
 	) {
 		// 내 정보 조회 처리
@@ -86,6 +88,7 @@ public class UserProfileController {
 
 	@PatchMapping("/me")
 	@Operation(summary = "내 정보 수정", description = "로그인 사용자의 닉네임을 수정합니다.")
+	@SecurityRequirement(name = "bearerAuth")
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(
 			description = "내 정보 수정 요청 정보",
 			required = true,
@@ -134,7 +137,7 @@ public class UserProfileController {
 			)
 	})
 	public ResponseEntity<ApiResponse<UserProfileResponse>> updateMyProfile(
-			@Parameter(description = "Bearer access token", required = true, example = "Bearer access-token")
+			@Parameter(hidden = true)
 			@RequestHeader("Authorization") String authorizationHeader,
 			@RequestBody UserProfileUpdateRequest request
 	) {
@@ -147,6 +150,7 @@ public class UserProfileController {
 
 	@DeleteMapping("/me")
 	@Operation(summary = "회원 탈퇴", description = "로그인 사용자를 soft delete 처리합니다.")
+	@SecurityRequirement(name = "bearerAuth")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(
 					responseCode = "200",
@@ -180,7 +184,7 @@ public class UserProfileController {
 			)
 	})
 	public ResponseEntity<ApiResponse<Void>> withdraw(
-			@Parameter(description = "Bearer access token", required = true, example = "Bearer access-token")
+			@Parameter(hidden = true)
 			@RequestHeader("Authorization") String authorizationHeader
 	) {
 		// 회원 탈퇴 처리
