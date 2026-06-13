@@ -26,7 +26,9 @@ public class UserPreferenceService {
 	}
 
 	public UserPreferenceResponse getMyPreference(Long userId) {
+		// 사용자 활성 상태 검증
 		User user = getActiveUser(userId);
+		// 저장된 취향 조회
 		return userPreferenceRepository.findByUserId(user.getId())
 				.map(this::toResponse)
 				.orElseGet(UserPreferenceResponse::empty);
@@ -34,9 +36,12 @@ public class UserPreferenceService {
 
 	@Transactional
 	public UserPreferenceResponse saveMyPreference(Long userId, UserPreferenceRequest request) {
+		// 사용자 활성 상태 검증
 		User user = getActiveUser(userId);
+		// 취향 요청 값 검증
 		validateRequest(request);
 
+		// 기존 취향 조회 또는 신규 생성
 		UserPreference preference = userPreferenceRepository.findByUserId(user.getId())
 				.orElseGet(() -> UserPreference.create(
 						user,
@@ -45,8 +50,10 @@ public class UserPreferenceService {
 						request.themeIds(),
 						request.tagIds()
 				));
+		// 취향 선택 값 교체
 		preference.replace(request.preferredTripDuration(), request.regionIds(), request.themeIds(), request.tagIds());
 
+		// 저장 결과 응답 생성
 		return toResponse(userPreferenceRepository.save(preference));
 	}
 
