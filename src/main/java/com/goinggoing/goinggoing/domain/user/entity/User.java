@@ -53,6 +53,14 @@ public class User {
 		return new User(id, email, passwordHash, nickname, status);
 	}
 
+	public void updateNickname(String nickname) {
+		this.nickname = nickname;
+	}
+
+	public void withdraw() {
+		this.status = UserStatus.DELETED;
+	}
+
 	public boolean hasId() {
 		return id != null;
 	}

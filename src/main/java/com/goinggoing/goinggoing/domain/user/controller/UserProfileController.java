@@ -1,6 +1,7 @@
 package com.goinggoing.goinggoing.domain.user.controller;
 
 import com.goinggoing.goinggoing.domain.user.dto.UserProfileResponse;
+import com.goinggoing.goinggoing.domain.user.dto.UserProfileUpdateRequest;
 import com.goinggoing.goinggoing.domain.user.service.UserProfileService;
 import com.goinggoing.goinggoing.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,7 +12,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -74,5 +78,20 @@ public class UserProfileController {
 		UserProfileResponse response = userProfileService.getMyProfile(userId);
 		// 내 정보 응답 반환
 		return ResponseEntity.ok(ApiResponse.success(response, "내 정보 조회가 완료되었습니다."));
+	}
+
+	@PatchMapping("/me")
+	public ResponseEntity<ApiResponse<UserProfileResponse>> updateMyProfile(
+			@RequestHeader("X-USER-ID") Long userId,
+			@RequestBody UserProfileUpdateRequest request
+	) {
+		UserProfileResponse response = userProfileService.updateMyProfile(userId, request);
+		return ResponseEntity.ok(ApiResponse.success(response, "내 정보 수정이 완료되었습니다."));
+	}
+
+	@DeleteMapping("/me")
+	public ResponseEntity<ApiResponse<Void>> withdraw(@RequestHeader("X-USER-ID") Long userId) {
+		userProfileService.withdraw(userId);
+		return ResponseEntity.ok(ApiResponse.success(null, "회원 탈퇴가 완료되었습니다."));
 	}
 }
