@@ -31,6 +31,7 @@ public class ContentLookupService {
 
 	@Transactional(readOnly = true)
 	public List<ContentSummaryResponse> getContents(Long regionId, Long themeId, ContentType contentType) {
+		// 컨텐츠 카드 응답 생성
 		return contentRepository.findPublishedContents(regionId, themeId, contentType)
 				.stream()
 				.map(this::toSummaryResponse)
@@ -39,16 +40,20 @@ public class ContentLookupService {
 
 	@Transactional
 	public ContentDetailResponse getContentDetail(Long contentId) {
+		// 공개 컨텐츠 조회
 		Content content = contentRepository.findPublishedContent(contentId)
 				.orElseThrow(() -> new BusinessException(ErrorCode.CONTENT_NOT_FOUND));
 
+		// 조회수 증가
 		content.increaseViewCount();
 
+		// 상세 응답 생성
 		return toDetailResponse(content);
 	}
 
 	@Transactional(readOnly = true)
 	public List<ContentSummaryResponse> getHotContents() {
+		// HOT 컨텐츠 응답 생성
 		return contentRepository.findHotContents()
 				.stream()
 				.limit(HOT_CONTENT_LIMIT)
