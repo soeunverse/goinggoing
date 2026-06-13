@@ -143,7 +143,36 @@
 | --- | --- | --- | --- |
 | Inactive user | User status is not `ACTIVE` | Client calls my profile API | `401 Unauthorized`, `UNAUTHORIZED` common failure response |
 
-## Phase 6. Category Lookup
+## Phase 6. User Profile Mutation APIs
+
+### Target APIs
+
+- `PATCH /api/users/me`
+- `DELETE /api/users/me`
+
+### Success Cases
+
+| Case | Given | When | Then |
+| --- | --- | --- | --- |
+| Profile update success | `X-USER-ID` header points to an active user and nickname is valid | Client updates my profile | `200 OK`, updated user id/email/nickname/status are returned |
+| Withdraw success | `X-USER-ID` header points to an active user | Client withdraws account | User status becomes `DELETED` and response has no data |
+
+### Failure Cases
+
+| Case | Given | When | Then |
+| --- | --- | --- | --- |
+| Missing user id header | `X-USER-ID` header is missing | Client updates or withdraws | `401 Unauthorized`, `UNAUTHORIZED` common failure response |
+| User not found | Header user id does not exist | Client updates or withdraws | `404 Not Found`, `USER_NOT_FOUND` common failure response |
+| Invalid nickname | Nickname is blank | Client updates my profile | `400 Bad Request`, `INVALID_NICKNAME` common failure response |
+
+### Edge Cases
+
+| Case | Given | When | Then |
+| --- | --- | --- | --- |
+| Inactive user | User status is not `ACTIVE` | Client updates or withdraws | `401 Unauthorized`, `UNAUTHORIZED` common failure response |
+| Nickname duplicate | Same nickname exists | Client updates my profile | Update succeeds because nickname duplication is allowed |
+
+## Phase 7. Category Lookup
 
 ### Target APIs
 
