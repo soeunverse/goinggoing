@@ -61,7 +61,33 @@
 | Nickname duplicate | Same nickname exists | User signs up | Signup succeeds because nickname duplication is allowed |
 | Password length max | Password is longer than 100 characters | User signs up | `INVALID_PASSWORD` business exception |
 
-## Phase 3. Category Lookup
+## Phase 3. User Signup API
+
+### Target API
+
+- `POST /api/auth/signup`
+
+### Success Cases
+
+| Case | Given | When | Then |
+| --- | --- | --- | --- |
+| Signup API success | Valid signup request | Client calls signup API | `201 Created`, common success response, user id/email/nickname |
+
+### Failure Cases
+
+| Case | Given | When | Then |
+| --- | --- | --- | --- |
+| Duplicate email | Service throws `EMAIL_ALREADY_EXISTS` | Client calls signup API | `409 Conflict`, common failure response |
+| Invalid password | Service throws `INVALID_PASSWORD` | Client calls signup API | `400 Bad Request`, common failure response |
+| Invalid nickname | Service throws `INVALID_NICKNAME` | Client calls signup API | `400 Bad Request`, common failure response |
+
+### Edge Cases
+
+| Case | Given | When | Then |
+| --- | --- | --- | --- |
+| Malformed JSON | Request body is not readable | Client calls signup API | `400 Bad Request`, common failure response |
+
+## Phase 4. Category Lookup
 
 ### Target APIs
 
