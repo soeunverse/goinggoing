@@ -15,6 +15,8 @@ public enum ErrorCode {
 	INVALID_PREFERENCE(HttpStatus.BAD_REQUEST, "온보딩 취향 정보가 올바르지 않습니다."),
 	CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "카테고리를 찾을 수 없습니다."),
 	CONTENT_NOT_FOUND(HttpStatus.NOT_FOUND, "컨텐츠를 찾을 수 없습니다."),
+	BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "찜 항목을 찾을 수 없습니다."),
+	BOOKMARK_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 찜한 컨텐츠입니다."),
 	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.");
 
 	private final HttpStatus status;

@@ -144,6 +144,17 @@ public class Content {
 		this.hotScore = this.hotScore.add(BigDecimal.ONE);
 	}
 
+	public void increaseBookmarkCount() {
+		this.bookmarkCount += 1;
+		this.hotScore = this.hotScore.add(BigDecimal.ONE);
+	}
+
+	public void decreaseBookmarkCount() {
+		if (this.bookmarkCount > 0) {
+			this.bookmarkCount -= 1;
+		}
+	}
+
 	public void addCard(ContentCard card) {
 		this.cards.add(card);
 	}
