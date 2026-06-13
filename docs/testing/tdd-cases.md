@@ -172,7 +172,38 @@
 | Inactive user | User status is not `ACTIVE` | Client updates or withdraws | `401 Unauthorized`, `UNAUTHORIZED` common failure response |
 | Nickname duplicate | Same nickname exists | Client updates my profile | Update succeeds because nickname duplication is allowed |
 
-## Phase 7. Category Lookup
+## Phase 7. User Preference APIs
+
+### Target APIs
+
+- `GET /api/users/me/preferences`
+- `PUT /api/users/me/preferences`
+
+### Success Cases
+
+| Case | Given | When | Then |
+| --- | --- | --- | --- |
+| Preference lookup success | `X-USER-ID` header points to an active user with saved preferences | Client calls preference lookup API | `200 OK`, preferred duration and selected region/theme/tag ids are returned |
+| Empty preference lookup | Active user has no saved preferences yet | Client calls preference lookup API | `200 OK`, empty id lists and `null` duration are returned |
+| Preference upsert create | Active user has no saved preferences yet | Client saves preferences | New preference is saved and returned |
+| Preference upsert update | Active user already has preferences | Client saves preferences again | Existing preference is replaced and returned |
+
+### Failure Cases
+
+| Case | Given | When | Then |
+| --- | --- | --- | --- |
+| Missing user id header | `X-USER-ID` header is missing | Client looks up or saves preferences | `401 Unauthorized`, `UNAUTHORIZED` common failure response |
+| User not found | Header user id does not exist | Client looks up or saves preferences | `404 Not Found`, `USER_NOT_FOUND` common failure response |
+| Empty preference request | Duration is null and all id lists are empty | Client saves preferences | `400 Bad Request`, `INVALID_PREFERENCE` common failure response |
+
+### Edge Cases
+
+| Case | Given | When | Then |
+| --- | --- | --- | --- |
+| Inactive user | User status is not `ACTIVE` | Client looks up or saves preferences | `401 Unauthorized`, `UNAUTHORIZED` common failure response |
+| Duplicate ids | Request contains duplicate region/theme/tag ids | Client saves preferences | Duplicates are removed in the saved response |
+
+## Phase 8. Category Lookup
 
 ### Target APIs
 
