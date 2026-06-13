@@ -39,6 +39,7 @@ public class CategoryLookupService {
 	}
 
 	public List<CategoryItemResponse> getRegions() {
+		// 지역 응답 생성
 		return regionRepository.findAllByOrderByDisplayOrderAscIdAsc()
 				.stream()
 				.map(this::toRegionResponse)
@@ -46,6 +47,7 @@ public class CategoryLookupService {
 	}
 
 	public List<ThemeResponse> getThemes() {
+		// 테마 응답 생성
 		return themeRepository.findAllByOrderByDisplayOrderAscIdAsc()
 				.stream()
 				.map(this::toThemeResponse)
@@ -53,10 +55,12 @@ public class CategoryLookupService {
 	}
 
 	public List<CategoryItemResponse> getSubThemes(Long themeId) {
+		// 테마 존재 여부 검증
 		if (!themeRepository.existsById(themeId)) {
 			throw new BusinessException(ErrorCode.CATEGORY_NOT_FOUND);
 		}
 
+		// 하위 카테고리 응답 생성
 		return subThemeRepository.findByThemeIdOrderByDisplayOrderAscIdAsc(themeId)
 				.stream()
 				.map(this::toSubThemeResponse)
@@ -64,6 +68,7 @@ public class CategoryLookupService {
 	}
 
 	public List<CategoryItemResponse> getTags() {
+		// 태그 응답 생성
 		return tagRepository.findAllByOrderByDisplayOrderAscIdAsc()
 				.stream()
 				.map(this::toTagResponse)
