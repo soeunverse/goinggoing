@@ -33,10 +33,12 @@ public class RecommendationService {
 	}
 
 	public List<ContentSummaryResponse> getFeed(Long userId) {
+		// 비로그인 HOT fallback
 		if (userId == null) {
 			return hotFallback(FEED_LIMIT);
 		}
 
+		// 취향 기반 피드 추천
 		return userPreferenceRepository.findByUserId(userId)
 				.filter(this::hasAnyPreference)
 				.map(preference -> contentRepository.findRecommendedFeed(
@@ -53,9 +55,11 @@ public class RecommendationService {
 	}
 
 	public List<ContentSummaryResponse> getRelatedContents(Long contentId) {
+		// 기준 컨텐츠 조회
 		Content baseContent = contentRepository.findPublishedContent(contentId)
 				.orElseThrow(() -> new BusinessException(ErrorCode.CONTENT_NOT_FOUND));
 
+		// 연관 컨텐츠 추천
 		return contentRepository.findRelatedContents(
 						baseContent.getId(),
 						baseContent.getRegion().getId(),
@@ -69,7 +73,9 @@ public class RecommendationService {
 	}
 
 	public List<ContentSummaryResponse> getRouletteCandidates(RouletteRecommendationCondition condition) {
+		// 태그 조건 정리
 		List<Long> tagIds = condition.tagIds() == null || condition.tagIds().isEmpty() ? null : condition.tagIds();
+		// 룰렛 후보 추천
 		return contentRepository.findRouletteCandidates(
 						condition.regionId(),
 						condition.themeId(),
@@ -84,6 +90,7 @@ public class RecommendationService {
 	}
 
 	private List<ContentSummaryResponse> hotFallback(int limit) {
+		// HOT fallback 응답 생성
 		return contentRepository.findHotContents()
 				.stream()
 				.limit(limit)
