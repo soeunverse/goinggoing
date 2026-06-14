@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class ContentManagementServiceTest {
@@ -99,6 +100,20 @@ class ContentManagementServiceTest {
 		assertThat(response.title()).isEqualTo("성심당 업데이트");
 		assertThat(response.cards()).extracting(card -> card.title()).containsExactly("대표 메뉴");
 		assertThat(response.tags()).extracting(tag -> tag.name()).containsExactly("빵지순례");
+		verify(contentRepository).flush();
+	}
+
+	@Test
+	@DisplayName("카드 노출 순서가 중복되면 컨텐츠 수정은 BAD_REQUEST 예외가 발생한다")
+	void updateContentDuplicateCardOrderFails() {
+		stubAdmin();
+		stubCategories();
+		Content content = content("성심당");
+		when(contentRepository.findById(1L)).thenReturn(Optional.of(content));
+
+		assertThatThrownBy(() -> contentManagementService.updateContent(1L, 1L, duplicateCardOrderRequest()))
+				.isInstanceOfSatisfying(BusinessException.class, exception ->
+						assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.BAD_REQUEST));
 	}
 
 	@Test
@@ -148,6 +163,28 @@ class ContentManagementServiceTest {
 				true,
 				List.of(1L),
 				List.of(new ContentManagementCardRequest("대표 메뉴", "튀김소보로와 부추빵", "https://image.test/card.jpg", 1))
+		);
+	}
+
+	private ContentManagementRequest duplicateCardOrderRequest() {
+		return new ContentManagementRequest(
+				3L,
+				1L,
+				1L,
+				"성심당 업데이트",
+				ContentType.RESTAURANT,
+				"대전 당일치기 대표 컨텐츠",
+				"카드뉴스 설명",
+				"대전 중구 대종로",
+				new BigDecimal("36.32750"),
+				new BigDecimal("127.42720"),
+				"https://image.test/thumb.jpg",
+				true,
+				List.of(1L),
+				List.of(
+						new ContentManagementCardRequest("대표 메뉴", "튀김소보로와 부추빵", "https://image.test/card1.jpg", 1),
+						new ContentManagementCardRequest("방문 팁", "오픈 시간대 방문 추천", "https://image.test/card2.jpg", 1)
+				)
 		);
 	}
 

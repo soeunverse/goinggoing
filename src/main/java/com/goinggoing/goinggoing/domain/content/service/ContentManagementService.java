@@ -25,7 +25,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -62,6 +64,8 @@ public class ContentManagementService {
 		CategoryValues categoryValues = resolveCategories(request);
 		// 태그 값 조회
 		List<Tag> tags = resolveTags(request.tagIds());
+		// 카드 순서 검증
+		validateCards(request.cards());
 
 		// 관리자 컨텐츠 생성
 		Content content = Content.createAdminContent(
@@ -98,6 +102,8 @@ public class ContentManagementService {
 		CategoryValues categoryValues = resolveCategories(request);
 		// 태그 값 조회
 		List<Tag> tags = resolveTags(request.tagIds());
+		// 카드 순서 검증
+		validateCards(request.cards());
 
 		// 컨텐츠 정보 수정
 		content.update(
@@ -114,6 +120,9 @@ public class ContentManagementService {
 				request.thumbnailUrl(),
 				request.published()
 		);
+		// 기존 카드 삭제 반영
+		content.replaceCards(List.of());
+		contentRepository.flush();
 		// 카드와 태그 전체 교체
 		content.replaceCards(toCards(content, request.cards()));
 		content.replaceTags(tags);
@@ -164,6 +173,18 @@ public class ContentManagementService {
 			throw new BusinessException(ErrorCode.CATEGORY_NOT_FOUND);
 		}
 		return tags;
+	}
+
+	private void validateCards(List<ContentManagementCardRequest> cards) {
+		if (cards == null || cards.isEmpty()) {
+			return;
+		}
+		Set<Integer> displayOrders = new HashSet<>();
+		for (ContentManagementCardRequest card : cards) {
+			if (card.displayOrder() == null || !displayOrders.add(card.displayOrder())) {
+				throw new BusinessException(ErrorCode.BAD_REQUEST);
+			}
+		}
 	}
 
 	private List<ContentCard> toCards(Content content, List<ContentManagementCardRequest> cards) {
