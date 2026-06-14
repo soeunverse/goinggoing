@@ -11,15 +11,18 @@
 
 ```env
 PORT=8080
-DB_URL=jdbc:mariadb://{HOST}:{PORT}/{DATABASE}
-DB_USERNAME={DB_USER}
-DB_PASSWORD={DB_PASSWORD}
+SPRING_DATASOURCE_URL=jdbc:mariadb://goinggoing-db:3306/goinggoing
+SPRING_DATASOURCE_USERNAME=root
+SPRING_DATASOURCE_PASSWORD=9422
 JWT_SECRET={충분히_긴_랜덤_문자열}
 KTO_SYNC_ENABLED=true
 KTO_SERVICE_KEY={재발급한_공공데이터_인증키}
 KTO_BASE_YM=202503
 CORS_ALLOWED_ORIGINS={프론트_도메인}
 ```
+
+Cloudtype 환경변수 값에는 `${SPRING_DATASOURCE_URL}` 같은 플레이스홀더 문자열을 넣지 않습니다.
+값 칸에는 `jdbc:mariadb://goinggoing-db:3306/goinggoing`처럼 실제 접속 문자열을 그대로 입력합니다.
 
 ## 배포 전 DB 작업
 
