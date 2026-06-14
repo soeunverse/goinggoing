@@ -14,9 +14,11 @@ import com.goinggoing.goinggoing.domain.sync.repository.RelatedPlaceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,7 +54,8 @@ class KtoExternalDataSyncClientTest {
 				relatedPlaceRepository,
 				objectMapper,
 				20,
-				100
+				100,
+				"202504"
 		);
 	}
 
@@ -85,6 +88,11 @@ class KtoExternalDataSyncClientTest {
 
 		assertThat(result.importedCount()).isEqualTo(2);
 		assertThat(result.failedCount()).isZero();
+		ArgumentCaptor<Map<String, String>> parameterCaptor = ArgumentCaptor.forClass(Map.class);
+		verify(ktoApiGateway).fetchItems(eq(KtoEndpoint.REGIONAL_SERVICE_DEMAND), parameterCaptor.capture());
+		assertThat(parameterCaptor.getValue())
+				.containsEntry("areaCd", "3")
+				.containsEntry("baseYm", "202504");
 		verify(regionalDemandMetricRepository, times(2)).save(any(RegionalDemandMetric.class));
 	}
 
@@ -130,6 +138,13 @@ class KtoExternalDataSyncClientTest {
 
 		assertThat(result.importedCount()).isEqualTo(1);
 		assertThat(result.failedCount()).isZero();
+		ArgumentCaptor<Map<String, String>> parameterCaptor = ArgumentCaptor.forClass(Map.class);
+		verify(ktoApiGateway).fetchItems(eq(KtoEndpoint.RELATED_PLACE_KEYWORD), parameterCaptor.capture());
+		assertThat(parameterCaptor.getValue())
+				.containsEntry("areaCd", "6")
+				.containsEntry("signguCd", "0")
+				.containsEntry("baseYm", "202504")
+				.containsEntry("keyword", "광안리 해수욕장");
 		verify(relatedPlaceRepository).deleteByBaseContentId(10L);
 		verify(relatedPlaceRepository).save(any(RelatedPlace.class));
 	}

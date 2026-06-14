@@ -18,6 +18,9 @@ public class Region {
 	@Column(name = "area_code")
 	private String areaCode;
 
+	@Column(name = "sigungu_code")
+	private String sigunguCode;
+
 	@Column(nullable = false)
 	private String name;
 
@@ -33,6 +36,7 @@ public class Region {
 	public Region(Long id, String areaCode, String name, String fullName, Integer displayOrder) {
 		this.id = id;
 		this.areaCode = areaCode;
+		this.sigunguCode = "0";
 		this.name = name;
 		this.fullName = fullName;
 		this.displayOrder = displayOrder;
@@ -44,6 +48,10 @@ public class Region {
 
 	public String getAreaCode() {
 		return areaCode;
+	}
+
+	public String getSigunguCode() {
+		return sigunguCode;
 	}
 
 	public String getName() {

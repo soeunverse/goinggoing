@@ -10,6 +10,8 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriBuilder;
 
 import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -35,7 +37,7 @@ public class KtoRestApiGateway implements KtoApiGateway {
 	) {
 		this.restClient = restClientBuilder.build();
 		this.objectMapper = objectMapper;
-		this.serviceKey = serviceKey;
+		this.serviceKey = normalizeServiceKey(serviceKey);
 		this.regionalDemandBaseUrl = regionalDemandBaseUrl;
 		this.relatedPlaceBaseUrl = relatedPlaceBaseUrl;
 	}
@@ -62,14 +64,23 @@ public class KtoRestApiGateway implements KtoApiGateway {
 				.queryParam("serviceKey", serviceKey)
 				.queryParam("numOfRows", queryParameters.getOrDefault("numOfRows", "100"))
 				.queryParam("pageNo", queryParameters.getOrDefault("pageNo", "1"))
+				.queryParam("MobileOS", queryParameters.getOrDefault("MobileOS", "ETC"))
+				.queryParam("MobileApp", queryParameters.getOrDefault("MobileApp", "goinggoing"))
 				.queryParam("_type", "json");
 
 		queryParameters.forEach((key, value) -> {
-			if (!"numOfRows".equals(key) && !"pageNo".equals(key) && value != null && !value.isBlank()) {
+			if (!isDefaultQueryParameter(key) && value != null && !value.isBlank()) {
 				builder.queryParam(key, value);
 			}
 		});
 		return builder.build();
+	}
+
+	private boolean isDefaultQueryParameter(String key) {
+		return "numOfRows".equals(key)
+				|| "pageNo".equals(key)
+				|| "MobileOS".equals(key)
+				|| "MobileApp".equals(key);
 	}
 
 	private String resolveHost(KtoEndpoint endpoint) {
@@ -131,6 +142,16 @@ public class KtoRestApiGateway implements KtoApiGateway {
 
 	private Map<String, String> sanitizeQueryParameters(Map<String, String> queryParameters) {
 		return queryParameters;
+	}
+
+	private String normalizeServiceKey(String serviceKey) {
+		if (serviceKey == null || serviceKey.isBlank()) {
+			return serviceKey;
+		}
+		if (!serviceKey.contains("%")) {
+			return serviceKey;
+		}
+		return URLDecoder.decode(serviceKey, StandardCharsets.UTF_8);
 	}
 
 	private String abbreviate(String responseBody) {

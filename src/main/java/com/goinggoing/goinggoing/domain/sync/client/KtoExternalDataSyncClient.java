@@ -36,6 +36,7 @@ public class KtoExternalDataSyncClient implements ExternalDataSyncClient {
 	private final ObjectMapper objectMapper;
 	private final int relatedPlaceRows;
 	private final int demandRows;
+	private final String baseYearMonth;
 
 	public KtoExternalDataSyncClient(
 			KtoApiGateway ktoApiGateway,
@@ -45,7 +46,8 @@ public class KtoExternalDataSyncClient implements ExternalDataSyncClient {
 			RelatedPlaceRepository relatedPlaceRepository,
 			ObjectMapper objectMapper,
 			@Value("${kto.sync.related-place-rows:20}") int relatedPlaceRows,
-			@Value("${kto.sync.demand-rows:100}") int demandRows
+			@Value("${kto.sync.demand-rows:100}") int demandRows,
+			@Value("${kto.sync.base-ym:202504}") String baseYearMonth
 	) {
 		this.ktoApiGateway = ktoApiGateway;
 		this.regionRepository = regionRepository;
@@ -55,6 +57,7 @@ public class KtoExternalDataSyncClient implements ExternalDataSyncClient {
 		this.objectMapper = objectMapper;
 		this.relatedPlaceRows = relatedPlaceRows;
 		this.demandRows = demandRows;
+		this.baseYearMonth = baseYearMonth;
 	}
 
 	@Override
@@ -64,10 +67,20 @@ public class KtoExternalDataSyncClient implements ExternalDataSyncClient {
 		int failedCount = 0;
 
 		for (Content content : contents) {
+			Region region = content.getRegion();
+			if (region.getAreaCode() == null || region.getAreaCode().isBlank()
+					|| region.getSigunguCode() == null || region.getSigunguCode().isBlank()) {
+				log.warn("[KTO 스킵] 연관 관광지 필수 지역 코드 누락 contentId={} title={} areaCd={} signguCd={}",
+						content.getId(), content.getTitle(), region.getAreaCode(), region.getSigunguCode());
+				continue;
+			}
 			try {
 				List<JsonNode> items = ktoApiGateway.fetchItems(
 						KtoEndpoint.RELATED_PLACE_KEYWORD,
 						Map.of(
+								"areaCd", region.getAreaCode(),
+								"signguCd", region.getSigunguCode(),
+								"baseYm", baseYearMonth,
 								"keyword", content.getTitle(),
 								"numOfRows", String.valueOf(relatedPlaceRows),
 								"pageNo", "1"
@@ -115,6 +128,7 @@ public class KtoExternalDataSyncClient implements ExternalDataSyncClient {
 				endpoint,
 				Map.of(
 						"areaCd", region.getAreaCode(),
+						"baseYm", baseYearMonth,
 						"numOfRows", String.valueOf(demandRows),
 						"pageNo", "1"
 				)
