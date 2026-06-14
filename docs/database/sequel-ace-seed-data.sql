@@ -425,6 +425,16 @@ ON DUPLICATE KEY UPDATE
   name = VALUES(name),
   recommendation_note = VALUES(recommendation_note);
 
+UPDATE contents
+SET external_area_code = '26',
+    external_sigungu_code = '26500'
+WHERE title = '광안리 해수욕장';
+
+UPDATE contents
+SET external_area_code = '51',
+    external_sigungu_code = '51130'
+WHERE title = '뮤지엄산';
+
 INSERT INTO contents (
   region_id, theme_id, sub_theme_id, title, content_type, summary, description, address,
   latitude, longitude, thumbnail_url, source_type, external_content_id,

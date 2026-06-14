@@ -55,7 +55,7 @@ class KtoExternalDataSyncClientTest {
 				objectMapper,
 				20,
 				100,
-				"202504"
+				"202503"
 		);
 	}
 
@@ -92,7 +92,7 @@ class KtoExternalDataSyncClientTest {
 		verify(ktoApiGateway).fetchItems(eq(KtoEndpoint.REGIONAL_SERVICE_DEMAND), parameterCaptor.capture());
 		assertThat(parameterCaptor.getValue())
 				.containsEntry("areaCd", "3")
-				.containsEntry("baseYm", "202504");
+				.containsEntry("baseYm", "202503");
 		verify(regionalDemandMetricRepository, times(2)).save(any(RegionalDemandMetric.class));
 	}
 
@@ -118,11 +118,13 @@ class KtoExternalDataSyncClientTest {
 				BigDecimal.ZERO,
 				true
 		);
+		content.updateExternalLocation("26", "26500");
 		when(contentRepository.findAllPublishedForSync()).thenReturn(List.of(content));
 		when(relatedPlaceRepository.save(any(RelatedPlace.class))).thenAnswer(invocation -> invocation.getArgument(0));
 		when(ktoApiGateway.fetchItems(eq(KtoEndpoint.RELATED_PLACE_KEYWORD), any()))
 				.thenReturn(List.of(json("""
 						{
+						  "tAtsNm": "광안리 해수욕장",
 						  "rlteTatsNm": "민락수변공원",
 						  "rlteTatsType": "관광지",
 						  "rlteRank": "1",
@@ -130,7 +132,7 @@ class KtoExternalDataSyncClientTest {
 						  "rlteAddr": "부산 수영구 민락동",
 						  "rlteMapY": "35.1547000",
 						  "rlteMapX": "129.1276000",
-						  "baseYm": "202504"
+						  "baseYm": "202503"
 						}
 						""")));
 
@@ -141,9 +143,9 @@ class KtoExternalDataSyncClientTest {
 		ArgumentCaptor<Map<String, String>> parameterCaptor = ArgumentCaptor.forClass(Map.class);
 		verify(ktoApiGateway).fetchItems(eq(KtoEndpoint.RELATED_PLACE_KEYWORD), parameterCaptor.capture());
 		assertThat(parameterCaptor.getValue())
-				.containsEntry("areaCd", "6")
-				.containsEntry("signguCd", "0")
-				.containsEntry("baseYm", "202504")
+				.containsEntry("areaCd", "26")
+				.containsEntry("signguCd", "26500")
+				.containsEntry("baseYm", "202503")
 				.containsEntry("keyword", "광안리 해수욕장");
 		verify(relatedPlaceRepository).deleteByBaseContentId(10L);
 		verify(relatedPlaceRepository).save(any(RelatedPlace.class));

@@ -67,31 +67,25 @@ public class KtoExternalDataSyncClient implements ExternalDataSyncClient {
 		int failedCount = 0;
 
 		for (Content content : contents) {
-			Region region = content.getRegion();
-			if (region.getAreaCode() == null || region.getAreaCode().isBlank()
-					|| region.getSigunguCode() == null || region.getSigunguCode().isBlank()) {
+			String areaCode = resolveAreaCode(content);
+			String sigunguCode = resolveSigunguCode(content);
+			if (areaCode == null || areaCode.isBlank() || sigunguCode == null || sigunguCode.isBlank()) {
 				log.warn("[KTO 스킵] 연관 관광지 필수 지역 코드 누락 contentId={} title={} areaCd={} signguCd={}",
-						content.getId(), content.getTitle(), region.getAreaCode(), region.getSigunguCode());
+						content.getId(), content.getTitle(), areaCode, sigunguCode);
 				continue;
 			}
 			try {
-				List<JsonNode> items = ktoApiGateway.fetchItems(
-						KtoEndpoint.RELATED_PLACE_KEYWORD,
-						Map.of(
-								"areaCd", region.getAreaCode(),
-								"signguCd", region.getSigunguCode(),
-								"baseYm", baseYearMonth,
-								"keyword", content.getTitle(),
-								"numOfRows", String.valueOf(relatedPlaceRows),
-								"pageNo", "1"
-						)
-				);
+				List<JsonNode> items = fetchRelatedPlaceItems(content, areaCode, sigunguCode);
+				List<JsonNode> matchedItems = items.stream()
+						.filter(item -> matchesBasePlace(content, item))
+						.toList();
 				relatedPlaceRepository.deleteByBaseContentId(content.getId());
-				for (int index = 0; index < items.size(); index++) {
-					relatedPlaceRepository.save(toRelatedPlace(content, items.get(index), index + 1));
+				for (int index = 0; index < matchedItems.size(); index++) {
+					relatedPlaceRepository.save(toRelatedPlace(content, matchedItems.get(index), index + 1));
 				}
-				importedCount += items.size();
-				log.info("[DB 저장] 연관 관광지 저장 baseContentId={} keyword={} count={}", content.getId(), content.getTitle(), items.size());
+				importedCount += matchedItems.size();
+				log.info("[DB 저장] 연관 관광지 저장 baseContentId={} title={} areaCd={} signguCd={} fetchedCount={} matchedCount={}",
+						content.getId(), content.getTitle(), areaCode, sigunguCode, items.size(), matchedItems.size());
 			} catch (RuntimeException exception) {
 				failedCount++;
 				log.warn("[DB 저장 실패] 연관 관광지 저장 실패 baseContentId={} keyword={} error={}", content.getId(), content.getTitle(), exception.getMessage());
@@ -99,6 +93,63 @@ public class KtoExternalDataSyncClient implements ExternalDataSyncClient {
 		}
 
 		return new ExternalSyncResult(importedCount, failedCount, "연관 관광지 동기화 완료");
+	}
+
+	private List<JsonNode> fetchRelatedPlaceItems(Content content, String areaCode, String sigunguCode) {
+		List<JsonNode> keywordItems = ktoApiGateway.fetchItems(
+				KtoEndpoint.RELATED_PLACE_KEYWORD,
+				Map.of(
+						"areaCd", areaCode,
+						"signguCd", sigunguCode,
+						"baseYm", baseYearMonth,
+						"keyword", content.getTitle(),
+						"numOfRows", String.valueOf(relatedPlaceRows),
+						"pageNo", "1"
+				)
+		);
+		if (!keywordItems.isEmpty()) {
+			return keywordItems;
+		}
+		log.info("[KTO fallback] 키워드 연관 관광지 0건 - 지역 기반 조회 실행 contentId={} title={} areaCd={} signguCd={}",
+				content.getId(), content.getTitle(), areaCode, sigunguCode);
+		return ktoApiGateway.fetchItems(
+				KtoEndpoint.RELATED_PLACE_AREA_BASED,
+				Map.of(
+						"areaCd", areaCode,
+						"signguCd", sigunguCode,
+						"baseYm", baseYearMonth,
+						"numOfRows", String.valueOf(relatedPlaceRows),
+						"pageNo", "1"
+				)
+		);
+	}
+
+	private String resolveAreaCode(Content content) {
+		if (content.getExternalAreaCode() != null && !content.getExternalAreaCode().isBlank()) {
+			return content.getExternalAreaCode();
+		}
+		return content.getRegion().getAreaCode();
+	}
+
+	private String resolveSigunguCode(Content content) {
+		if (content.getExternalSigunguCode() != null && !content.getExternalSigunguCode().isBlank()) {
+			return content.getExternalSigunguCode();
+		}
+		return content.getRegion().getSigunguCode();
+	}
+
+	private boolean matchesBasePlace(Content content, JsonNode item) {
+		String basePlaceName = readText(item, "tAtsNm", "touristAttractionName", "basePlaceName");
+		if (basePlaceName == null || basePlaceName.isBlank()) {
+			return true;
+		}
+		String contentTitle = normalizeName(content.getTitle());
+		String ktoBaseName = normalizeName(basePlaceName);
+		return contentTitle.contains(ktoBaseName) || ktoBaseName.contains(contentTitle);
+	}
+
+	private String normalizeName(String value) {
+		return value == null ? "" : value.replaceAll("\\s+", "").toLowerCase();
 	}
 
 	@Override

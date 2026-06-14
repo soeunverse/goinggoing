@@ -42,7 +42,7 @@ kto:
   service-key: ${KTO_SERVICE_KEY:}
   sync:
     enabled: ${KTO_SYNC_ENABLED:false}
-    base-ym: ${KTO_BASE_YM:202504}
+    base-ym: ${KTO_BASE_YM:202503}
     demand-rows: ${KTO_DEMAND_ROWS:100}
     related-place-rows: ${KTO_RELATED_PLACE_ROWS:20}
   regional-demand:

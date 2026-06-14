@@ -72,6 +72,12 @@ public class Content {
 	@Column(name = "source_type", nullable = false)
 	private ContentSourceType sourceType = ContentSourceType.ADMIN;
 
+	@Column(name = "external_area_code")
+	private String externalAreaCode;
+
+	@Column(name = "external_sigungu_code")
+	private String externalSigunguCode;
+
 	@Column(name = "view_count", nullable = false)
 	private Long viewCount;
 
@@ -240,6 +246,11 @@ public class Content {
 		this.deletedAt = deletedAt;
 	}
 
+	public void updateExternalLocation(String externalAreaCode, String externalSigunguCode) {
+		this.externalAreaCode = externalAreaCode;
+		this.externalSigunguCode = externalSigunguCode;
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -286,6 +297,14 @@ public class Content {
 
 	public String getThumbnailUrl() {
 		return thumbnailUrl;
+	}
+
+	public String getExternalAreaCode() {
+		return externalAreaCode;
+	}
+
+	public String getExternalSigunguCode() {
+		return externalSigunguCode;
 	}
 
 	public Long getViewCount() {

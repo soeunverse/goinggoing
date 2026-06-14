@@ -102,7 +102,7 @@ public class KtoRestApiGateway implements KtoApiGateway {
 	}
 
 	private String resolveBaseUrl(KtoEndpoint endpoint) {
-		if (endpoint == KtoEndpoint.RELATED_PLACE_KEYWORD) {
+		if (endpoint == KtoEndpoint.RELATED_PLACE_AREA_BASED || endpoint == KtoEndpoint.RELATED_PLACE_KEYWORD) {
 			return relatedPlaceBaseUrl;
 		}
 		return regionalDemandBaseUrl;
