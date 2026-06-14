@@ -9,12 +9,14 @@ import com.goinggoing.goinggoing.domain.user.entity.UserPreference;
 import com.goinggoing.goinggoing.domain.user.repository.UserPreferenceRepository;
 import com.goinggoing.goinggoing.global.exception.BusinessException;
 import com.goinggoing.goinggoing.global.exception.ErrorCode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class RecommendationService {
@@ -33,13 +35,16 @@ public class RecommendationService {
 	}
 
 	public List<ContentSummaryResponse> getFeed(Long userId) {
+		log.info("[추천 요청] 피드 userId={}", userId);
 		// 비로그인 HOT 기본 추천
 		if (userId == null) {
-			return hotFallback(FEED_LIMIT);
+			List<ContentSummaryResponse> response = hotFallback(FEED_LIMIT);
+			log.info("[추천 응답] 피드 fallback=HOT count={}", response.size());
+			return response;
 		}
 
 		// 취향 기반 피드 추천
-		return userPreferenceRepository.findByUserId(userId)
+		List<ContentSummaryResponse> response = userPreferenceRepository.findByUserId(userId)
 				.filter(this::hasAnyPreference)
 				.map(preference -> contentRepository.findRecommendedFeed(
 						preference.getRegionIds(),
@@ -52,15 +57,18 @@ public class RecommendationService {
 				.limit(FEED_LIMIT)
 				.map(this::toSummaryResponse)
 				.toList();
+		log.info("[추천 응답] 피드 userId={} count={}", userId, response.size());
+		return response;
 	}
 
 	public List<ContentSummaryResponse> getRelatedContents(Long contentId) {
+		log.info("[추천 요청] 연관 컨텐츠 contentId={}", contentId);
 		// 기준 컨텐츠 조회
 		Content baseContent = contentRepository.findPublishedContent(contentId)
 				.orElseThrow(() -> new BusinessException(ErrorCode.CONTENT_NOT_FOUND));
 
 		// 연관 컨텐츠 추천
-		return contentRepository.findRelatedContents(
+		List<ContentSummaryResponse> response = contentRepository.findRelatedContents(
 						baseContent.getId(),
 						baseContent.getRegion().getId(),
 						baseContent.getTheme() == null ? null : baseContent.getTheme().getId(),
@@ -70,13 +78,23 @@ public class RecommendationService {
 				.limit(RELATED_LIMIT)
 				.map(this::toSummaryResponse)
 				.toList();
+		log.info("[추천 응답] 연관 컨텐츠 contentId={} count={}", contentId, response.size());
+		return response;
 	}
 
 	public List<ContentSummaryResponse> getRouletteCandidates(RouletteRecommendationCondition condition) {
 		// 태그 조건 정리
 		List<Long> tagIds = condition.tagIds() == null || condition.tagIds().isEmpty() ? null : condition.tagIds();
+		log.info(
+				"[추천 요청] 룰렛 후보 regionId={} themeId={} subThemeId={} contentType={} tagIds={}",
+				condition.regionId(),
+				condition.themeId(),
+				condition.subThemeId(),
+				condition.contentType(),
+				tagIds
+		);
 		// 룰렛 후보 추천
-		return contentRepository.findRouletteCandidates(
+		List<ContentSummaryResponse> response = contentRepository.findRouletteCandidates(
 						condition.regionId(),
 						condition.themeId(),
 						condition.subThemeId(),
@@ -87,6 +105,8 @@ public class RecommendationService {
 				.limit(ROULETTE_LIMIT)
 				.map(this::toSummaryResponse)
 				.toList();
+		log.info("[추천 응답] 룰렛 후보 count={}", response.size());
+		return response;
 	}
 
 	private List<ContentSummaryResponse> hotFallback(int limit) {

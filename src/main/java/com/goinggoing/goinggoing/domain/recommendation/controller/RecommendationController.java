@@ -8,6 +8,7 @@ import com.goinggoing.goinggoing.global.response.ApiResponse;
 import com.goinggoing.goinggoing.global.security.CurrentUserExtractor;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -96,7 +97,10 @@ public class RecommendationController {
 			@RequestParam(required = false) Long subThemeId,
 			@Parameter(description = "컨텐츠 유형", example = "RESTAURANT")
 			@RequestParam(required = false) ContentType contentType,
-			@Parameter(description = "태그 ID 목록", example = "1")
+			@Parameter(
+					description = "태그 ID 목록. 여러 개면 tagIds=1&tagIds=2 형식으로 전달하고, 선택하지 않으면 태그 조건 없이 조회합니다.",
+					array = @ArraySchema(schema = @Schema(type = "integer", format = "int64"))
+			)
 			@RequestParam(required = false) List<Long> tagIds
 	) {
 		// 룰렛 조건 생성

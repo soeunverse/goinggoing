@@ -42,12 +42,14 @@ public class KtoRestApiGateway implements KtoApiGateway {
 
 	@Override
 	public List<JsonNode> fetchItems(KtoEndpoint endpoint, Map<String, String> queryParameters) {
+		log.info("[KTO 요청] endpoint={} params={}", endpoint, sanitizeQueryParameters(queryParameters));
 		String responseBody = restClient.get()
 				.uri(uriBuilder -> buildUri(uriBuilder, endpoint, queryParameters))
 				.retrieve()
 				.body(String.class);
+		log.info("[KTO 응답 원문] endpoint={} body={}", endpoint, abbreviate(responseBody));
 		List<JsonNode> items = extractItems(responseBody);
-		log.info("[KTO 응답] endpoint={} params={} itemCount={}", endpoint, maskServiceKey(queryParameters), items.size());
+		log.info("[KTO 응답] endpoint={} itemCount={}", endpoint, items.size());
 		return items;
 	}
 
@@ -127,7 +129,18 @@ public class KtoRestApiGateway implements KtoApiGateway {
 		}
 	}
 
-	private Map<String, String> maskServiceKey(Map<String, String> queryParameters) {
+	private Map<String, String> sanitizeQueryParameters(Map<String, String> queryParameters) {
 		return queryParameters;
+	}
+
+	private String abbreviate(String responseBody) {
+		if (responseBody == null) {
+			return "";
+		}
+		int maxLength = 1000;
+		if (responseBody.length() <= maxLength) {
+			return responseBody;
+		}
+		return responseBody.substring(0, maxLength) + "...";
 	}
 }
