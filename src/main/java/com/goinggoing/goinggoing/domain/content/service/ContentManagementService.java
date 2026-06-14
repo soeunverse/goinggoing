@@ -54,10 +54,14 @@ public class ContentManagementService {
 
 	@Transactional
 	public ContentDetailResponse createContent(Long adminUserId, ContentManagementRequest request) {
+		// ADMIN 권한 검증
 		validateAdmin(adminUserId);
+		// 카테고리 값 조회
 		CategoryValues categoryValues = resolveCategories(request);
+		// 태그 값 조회
 		List<Tag> tags = resolveTags(request.tagIds());
 
+		// ADMIN 컨텐츠 생성
 		Content content = Content.createAdminContent(
 				categoryValues.region(),
 				categoryValues.theme(),
@@ -72,6 +76,7 @@ public class ContentManagementService {
 				request.thumbnailUrl(),
 				request.published()
 		);
+		// 카드와 태그 연결
 		content.replaceCards(toCards(content, request.cards()));
 		content.replaceTags(tags);
 
@@ -80,12 +85,17 @@ public class ContentManagementService {
 
 	@Transactional
 	public ContentDetailResponse updateContent(Long adminUserId, Long contentId, ContentManagementRequest request) {
+		// ADMIN 권한 검증
 		validateAdmin(adminUserId);
+		// 컨텐츠 조회
 		Content content = contentRepository.findById(contentId)
 				.orElseThrow(() -> new BusinessException(ErrorCode.CONTENT_NOT_FOUND));
+		// 카테고리 값 조회
 		CategoryValues categoryValues = resolveCategories(request);
+		// 태그 값 조회
 		List<Tag> tags = resolveTags(request.tagIds());
 
+		// 컨텐츠 정보 수정
 		content.update(
 				categoryValues.region(),
 				categoryValues.theme(),
@@ -100,6 +110,7 @@ public class ContentManagementService {
 				request.thumbnailUrl(),
 				request.published()
 		);
+		// 카드와 태그 전체 교체
 		content.replaceCards(toCards(content, request.cards()));
 		content.replaceTags(tags);
 
@@ -108,9 +119,12 @@ public class ContentManagementService {
 
 	@Transactional
 	public void deleteContent(Long adminUserId, Long contentId) {
+		// ADMIN 권한 검증
 		validateAdmin(adminUserId);
+		// 컨텐츠 조회
 		Content content = contentRepository.findById(contentId)
 				.orElseThrow(() -> new BusinessException(ErrorCode.CONTENT_NOT_FOUND));
+		// soft delete 처리
 		content.softDelete(LocalDateTime.now());
 	}
 
