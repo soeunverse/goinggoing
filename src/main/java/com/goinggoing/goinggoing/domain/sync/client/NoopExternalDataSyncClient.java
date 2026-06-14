@@ -1,14 +1,11 @@
 package com.goinggoing.goinggoing.domain.sync.client;
 
 import org.springframework.stereotype.Component;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 @Component
+@ConditionalOnProperty(name = "kto.sync.enabled", havingValue = "false", matchIfMissing = true)
 public class NoopExternalDataSyncClient implements ExternalDataSyncClient {
-
-	@Override
-	public ExternalSyncResult syncContents() {
-		return new ExternalSyncResult(0, 0, "컨텐츠 동기화 client 준비 완료");
-	}
 
 	@Override
 	public ExternalSyncResult syncRelatedPlaces() {

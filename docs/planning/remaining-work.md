@@ -16,13 +16,21 @@
 
 ## MVP 기준으로 남은 핵심 작업
 
-- 한국관광공사 API 실제 HTTP client 구현
-- 외부 API 응답을 내부 `contents`, `related_places`, `regional_demand_metrics`로 가공 저장
+- 한국관광공사 API 응답 필드명 최종 검증
+- 외부 API 응답을 내부 `related_places`, `regional_demand_metrics`로 가공 저장
 - 관리자 계정 생성 방식 확정
 - 배포 DB 스키마 생성 자동화 또는 운영 절차 확정
 - Cloudtype 환경변수 세팅
 - 배포 후 Swagger 수동 테스트
 - React Native 앱에서 API base URL 연결
+
+## 한국관광공사 API 연동 범위
+
+- 사용: 지역별 관광 자원 수요 `AreaTarResDemService`
+- 사용: 관광지별 연관 관광지 정보 `TarRlteTarService1`
+- 제외: 관광지 집중률 방문자 추이 예측 `TatsCnctrRateService`
+
+집중률 API는 혼잡도/방문 타이밍 기능이 생기면 MVP 이후 추가합니다.
 
 ## MVP 이후 개선 작업
 

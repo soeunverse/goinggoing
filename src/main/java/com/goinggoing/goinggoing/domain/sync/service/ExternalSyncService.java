@@ -19,7 +19,6 @@ import java.util.function.Supplier;
 @Service
 public class ExternalSyncService {
 
-	private static final String CONTENTS_ENDPOINT = "/external/kto/contents";
 	private static final String RELATED_PLACES_ENDPOINT = "/external/kto/related-places";
 	private static final String REGIONAL_DEMAND_ENDPOINT = "/external/kto/regional-demand";
 
@@ -35,14 +34,6 @@ public class ExternalSyncService {
 		this.adminAuthorizationService = adminAuthorizationService;
 		this.externalDataSyncClient = externalDataSyncClient;
 		this.externalSyncLogRepository = externalSyncLogRepository;
-	}
-
-	@Transactional
-	public ExternalSyncResponse syncContents(Long adminUserId) {
-		// 관리자 권한 검증
-		adminAuthorizationService.validateAdmin(adminUserId);
-		// 컨텐츠 동기화 실행
-		return executeSync(ContentSourceType.KTO_TOUR_API, CONTENTS_ENDPOINT, externalDataSyncClient::syncContents);
 	}
 
 	@Transactional

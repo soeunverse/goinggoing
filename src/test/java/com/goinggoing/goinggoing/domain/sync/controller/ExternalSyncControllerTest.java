@@ -32,20 +32,6 @@ class ExternalSyncControllerTest {
 			.build();
 
 	@Test
-	@DisplayName("컨텐츠 동기화 API는 Bearer 토큰 기반 ADMIN 요청을 처리한다")
-	void syncContentsSuccess() throws Exception {
-		when(currentUserExtractor.extractUserId("Bearer admin-token")).thenReturn(1L);
-		when(externalSyncService.syncContents(1L)).thenReturn(response(ContentSourceType.KTO_TOUR_API));
-
-		mockMvc.perform(post("/api/admin/sync/contents")
-						.header("Authorization", "Bearer admin-token"))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.success").value(true))
-				.andExpect(jsonPath("$.data.sourceType").value("KTO_TOUR_API"))
-				.andExpect(jsonPath("$.message").value("컨텐츠 동기화가 완료되었습니다."));
-	}
-
-	@Test
 	@DisplayName("연관 관광지 동기화 API는 200과 동기화 결과를 반환한다")
 	void syncRelatedPlacesSuccess() throws Exception {
 		when(currentUserExtractor.extractUserId("Bearer admin-token")).thenReturn(1L);
@@ -86,7 +72,7 @@ class ExternalSyncControllerTest {
 	@Test
 	@DisplayName("Authorization 헤더가 없으면 401을 반환한다")
 	void missingAuthorizationFails() throws Exception {
-		mockMvc.perform(post("/api/admin/sync/contents"))
+		mockMvc.perform(post("/api/admin/sync/related-places"))
 				.andExpect(status().isUnauthorized())
 				.andExpect(jsonPath("$.success").value(false))
 				.andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"));
@@ -99,8 +85,8 @@ class ExternalSyncControllerTest {
 	private ExternalSyncLogResponse log() {
 		return new ExternalSyncLogResponse(
 				1L,
-				ContentSourceType.KTO_TOUR_API,
-				"/contents",
+				ContentSourceType.KTO_RELATED_ATTRACTION,
+				"/related-places",
 				ExternalSyncStatus.SUCCESS,
 				LocalDateTime.of(2026, 6, 14, 10, 0),
 				LocalDateTime.of(2026, 6, 14, 10, 1),

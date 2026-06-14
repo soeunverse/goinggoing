@@ -42,31 +42,14 @@ class ExternalSyncServiceTest {
 	}
 
 	@Test
-	@DisplayName("ADMIN 사용자는 컨텐츠 동기화를 실행하고 SUCCESS 로그 응답을 받는다")
-	void syncContentsSuccess() {
-		doNothing().when(adminAuthorizationService).validateAdmin(1L);
-		when(externalDataSyncClient.syncContents()).thenReturn(new ExternalSyncResult(2, 0, "컨텐츠 동기화 완료"));
-		when(externalSyncLogRepository.save(any(ExternalSyncLog.class)))
-				.thenAnswer(invocation -> ((ExternalSyncLog) invocation.getArgument(0)).withId(1L));
-
-		ExternalSyncResponse response = externalSyncService.syncContents(1L);
-
-		assertThat(response.logId()).isEqualTo(1L);
-		assertThat(response.sourceType()).isEqualTo(ContentSourceType.KTO_TOUR_API);
-		assertThat(response.status()).isEqualTo(ExternalSyncStatus.SUCCESS);
-		assertThat(response.importedCount()).isEqualTo(2);
-		verify(adminAuthorizationService).validateAdmin(1L);
-	}
-
-	@Test
 	@DisplayName("외부 동기화 client 실패는 FAILED 로그로 저장한다")
-	void syncContentsClientFailureLogsFailed() {
+	void syncRelatedPlacesClientFailureLogsFailed() {
 		doNothing().when(adminAuthorizationService).validateAdmin(1L);
-		when(externalDataSyncClient.syncContents()).thenThrow(new IllegalStateException("API 실패"));
+		when(externalDataSyncClient.syncRelatedPlaces()).thenThrow(new IllegalStateException("API 실패"));
 		when(externalSyncLogRepository.save(any(ExternalSyncLog.class)))
 				.thenAnswer(invocation -> ((ExternalSyncLog) invocation.getArgument(0)).withId(2L));
 
-		ExternalSyncResponse response = externalSyncService.syncContents(1L);
+		ExternalSyncResponse response = externalSyncService.syncRelatedPlaces(1L);
 
 		assertThat(response.logId()).isEqualTo(2L);
 		assertThat(response.status()).isEqualTo(ExternalSyncStatus.FAILED);
@@ -107,7 +90,7 @@ class ExternalSyncServiceTest {
 	void getSyncLogsSuccess() {
 		doNothing().when(adminAuthorizationService).validateAdmin(1L);
 		when(externalSyncLogRepository.findAllByOrderByRequestedAtDesc())
-				.thenReturn(List.of(ExternalSyncLog.success(ContentSourceType.KTO_TOUR_API, "/contents", 2, 0, "완료").withId(1L)));
+				.thenReturn(List.of(ExternalSyncLog.success(ContentSourceType.KTO_RELATED_ATTRACTION, "/related-places", 2, 0, "완료").withId(1L)));
 
 		List<ExternalSyncLogResponse> responses = externalSyncService.getSyncLogs(1L);
 

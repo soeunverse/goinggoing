@@ -38,6 +38,10 @@ JWT_ZONE_ID=Asia/Seoul
 ACCESS_TOKEN_EXPIRES_IN_SECONDS=3600
 REFRESH_TOKEN_EXPIRES_IN_DAYS=14
 CORS_ALLOWED_ORIGINS={프론트에서 호출하는 Origin}
+KTO_SYNC_ENABLED=true
+KTO_SERVICE_KEY={한국관광공사 API 인증키}
+KTO_DEMAND_ROWS=100
+KTO_RELATED_PLACE_ROWS=20
 ```
 
 프로젝트에는 Git 배포용 `src/main/resources/application.yml`이 포함되어 있고, 위 환경변수를 읽어 DB와 CORS를 설정합니다. 로컬의 `application.properties`는 `.gitignore` 대상이므로 운영 비밀번호를 커밋하지 않습니다.

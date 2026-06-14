@@ -37,3 +37,14 @@ springdoc:
 app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173,http://localhost:8081,http://localhost:19006}
+
+kto:
+  service-key: ${KTO_SERVICE_KEY:}
+  sync:
+    enabled: ${KTO_SYNC_ENABLED:false}
+    demand-rows: ${KTO_DEMAND_ROWS:100}
+    related-place-rows: ${KTO_RELATED_PLACE_ROWS:20}
+  regional-demand:
+    base-url: ${KTO_REGIONAL_DEMAND_BASE_URL:https://apis.data.go.kr/B551011/AreaTarResDemService}
+  related-place:
+    base-url: ${KTO_RELATED_PLACE_BASE_URL:https://apis.data.go.kr/B551011/TarRlteTarService1}

@@ -42,6 +42,10 @@ public class Region {
 		return id;
 	}
 
+	public String getAreaCode() {
+		return areaCode;
+	}
+
 	public String getName() {
 		return name;
 	}

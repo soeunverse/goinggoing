@@ -14,7 +14,7 @@ public record ExternalSyncLogResponse(
 		@Schema(description = "동기화 소스 유형", example = "KTO_TOUR_API")
 		ContentSourceType sourceType,
 
-		@Schema(description = "동기화 대상 endpoint", example = "/external/kto/contents")
+		@Schema(description = "동기화 대상 endpoint", example = "/external/kto/related-places")
 		String endpoint,
 
 		@Schema(description = "동기화 상태", example = "SUCCESS")

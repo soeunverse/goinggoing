@@ -58,6 +58,16 @@ public interface ContentRepository extends JpaRepository<Content, Long> {
 			SELECT DISTINCT content
 			FROM Content content
 			LEFT JOIN FETCH content.region
+			WHERE content.published = true
+			  AND content.deletedAt IS NULL
+			ORDER BY content.id ASC
+			""")
+	List<Content> findAllPublishedForSync();
+
+	@Query("""
+			SELECT DISTINCT content
+			FROM Content content
+			LEFT JOIN FETCH content.region
 			LEFT JOIN FETCH content.theme
 			LEFT JOIN content.tags tag
 			WHERE content.published = true

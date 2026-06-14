@@ -34,26 +34,7 @@ public class ExternalSyncController {
 		this.currentUserExtractor = currentUserExtractor;
 	}
 
-	@Operation(summary = "컨텐츠 동기화", description = "한국관광공사 컨텐츠 데이터를 동기화합니다. 현재는 실제 HTTP 호출 전 client 인터페이스 기반 준비 단계입니다.")
-	@SecurityRequirement(name = "bearerAuth")
-	@ApiResponses({
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "컨텐츠 동기화 실행 완료", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "UNAUTHORIZED: 인증 헤더 누락 또는 비활성 사용자", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "FORBIDDEN: 관리자 권한 없음", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
-	})
-	@PostMapping("/contents")
-	public ResponseEntity<ApiResponse<ExternalSyncResponse>> syncContents(
-			@Parameter(hidden = true)
-			@RequestHeader("Authorization") String authorizationHeader
-	) {
-		// 관리자 인증 처리
-		Long adminUserId = currentUserExtractor.extractUserId(authorizationHeader);
-		// 컨텐츠 동기화 실행
-		ExternalSyncResponse response = externalSyncService.syncContents(adminUserId);
-		return ResponseEntity.ok(ApiResponse.success(response, "컨텐츠 동기화가 완료되었습니다."));
-	}
-
-	@Operation(summary = "연관 관광지 동기화", description = "한국관광공사 관광지별 연관 관광지 데이터를 동기화합니다. 현재는 client 인터페이스 기반 준비 단계입니다.")
+	@Operation(summary = "연관 관광지 동기화", description = "공개 컨텐츠 제목을 기준으로 한국관광공사 관광지별 연관 관광지 데이터를 조회해 related_places에 저장합니다.")
 	@SecurityRequirement(name = "bearerAuth")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "연관 관광지 동기화 실행 완료", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
@@ -72,7 +53,7 @@ public class ExternalSyncController {
 		return ResponseEntity.ok(ApiResponse.success(response, "연관 관광지 동기화가 완료되었습니다."));
 	}
 
-	@Operation(summary = "지역수요 동기화", description = "한국관광공사 지역별 관광 자원 수요 데이터를 동기화합니다. 현재는 client 인터페이스 기반 준비 단계입니다.")
+	@Operation(summary = "지역수요 동기화", description = "지역별 관광 서비스 수요와 문화 자원 수요 데이터를 조회해 regional_demand_metrics에 저장합니다.")
 	@SecurityRequirement(name = "bearerAuth")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "지역수요 동기화 실행 완료", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
