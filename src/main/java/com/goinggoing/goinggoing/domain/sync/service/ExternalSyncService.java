@@ -37,13 +37,17 @@ public class ExternalSyncService {
 
 	@Transactional
 	public ExternalSyncResponse syncContents(Long adminUserId) {
+		// ADMIN 권한 검증
 		adminAuthorizationService.validateAdmin(adminUserId);
+		// 컨텐츠 동기화 실행
 		return executeSync(ContentSourceType.KTO_TOUR_API, CONTENTS_ENDPOINT, externalDataSyncClient::syncContents);
 	}
 
 	@Transactional
 	public ExternalSyncResponse syncRelatedPlaces(Long adminUserId) {
+		// ADMIN 권한 검증
 		adminAuthorizationService.validateAdmin(adminUserId);
+		// 연관 관광지 동기화 실행
 		return executeSync(
 				ContentSourceType.KTO_RELATED_ATTRACTION,
 				RELATED_PLACES_ENDPOINT,
@@ -53,7 +57,9 @@ public class ExternalSyncService {
 
 	@Transactional
 	public ExternalSyncResponse syncRegionalDemand(Long adminUserId) {
+		// ADMIN 권한 검증
 		adminAuthorizationService.validateAdmin(adminUserId);
+		// 지역수요 동기화 실행
 		return executeSync(
 				ContentSourceType.KTO_REGIONAL_DEMAND,
 				REGIONAL_DEMAND_ENDPOINT,
@@ -63,7 +69,9 @@ public class ExternalSyncService {
 
 	@Transactional(readOnly = true)
 	public List<ExternalSyncLogResponse> getSyncLogs(Long adminUserId) {
+		// ADMIN 권한 검증
 		adminAuthorizationService.validateAdmin(adminUserId);
+		// 동기화 로그 응답 생성
 		return externalSyncLogRepository.findAllByOrderByRequestedAtDesc()
 				.stream()
 				.map(this::toLogResponse)
@@ -77,7 +85,9 @@ public class ExternalSyncService {
 	) {
 		ExternalSyncLog log;
 		try {
+			// 외부 client 실행
 			ExternalSyncResult result = syncSupplier.get();
+			// 성공/부분성공 로그 생성
 			log = ExternalSyncLog.success(
 					sourceType,
 					endpoint,
@@ -86,8 +96,10 @@ public class ExternalSyncService {
 					result.message()
 			);
 		} catch (RuntimeException exception) {
+			// 실패 로그 생성
 			log = ExternalSyncLog.failed(sourceType, endpoint, exception.getMessage());
 		}
+		// 로그 저장 후 응답 생성
 		return toResponse(externalSyncLogRepository.save(log));
 	}
 
