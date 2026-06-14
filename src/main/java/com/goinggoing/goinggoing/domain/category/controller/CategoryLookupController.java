@@ -20,7 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/categories")
-@Tag(name = "Category", description = "지역, 테마, 하위 카테고리, 태그 조회 API")
+@Tag(name = "카테고리", description = "지역, 테마, 하위 카테고리, 태그 조회 API")
 public class CategoryLookupController {
 
 	private final CategoryLookupService categoryLookupService;
@@ -29,7 +29,7 @@ public class CategoryLookupController {
 		this.categoryLookupService = categoryLookupService;
 	}
 
-	@Operation(summary = "지역 목록 조회", description = "전국 시/도 단위 지역 목록을 displayOrder 순서로 조회합니다. 인증이 필요 없는 public API입니다.")
+	@Operation(summary = "지역 목록 조회", description = "전국 시/도 단위 지역 목록을 화면 노출 순서로 조회합니다. 인증이 필요 없는 공개 API입니다.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(
 					responseCode = "200",
@@ -44,7 +44,7 @@ public class CategoryLookupController {
 		return ResponseEntity.ok(ApiResponse.success(response, "지역 목록 조회가 완료되었습니다."));
 	}
 
-	@Operation(summary = "테마 목록 조회", description = "MVP 추천/검색에 사용할 상위 테마 목록을 조회합니다. 인증이 필요 없는 public API입니다.")
+	@Operation(summary = "테마 목록 조회", description = "추천과 검색에 사용할 상위 테마 목록을 조회합니다. 인증이 필요 없는 공개 API입니다.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(
 					responseCode = "200",
@@ -59,7 +59,7 @@ public class CategoryLookupController {
 		return ResponseEntity.ok(ApiResponse.success(response, "테마 목록 조회가 완료되었습니다."));
 	}
 
-	@Operation(summary = "하위 카테고리 목록 조회", description = "상위 테마 ID에 속한 하위 카테고리 목록을 조회합니다. 인증이 필요 없는 public API입니다.")
+	@Operation(summary = "하위 카테고리 목록 조회", description = "상위 테마 ID에 속한 하위 카테고리 목록을 조회합니다. 인증이 필요 없는 공개 API입니다.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(
 					responseCode = "200",
@@ -82,7 +82,7 @@ public class CategoryLookupController {
 		return ResponseEntity.ok(ApiResponse.success(response, "하위 카테고리 목록 조회가 완료되었습니다."));
 	}
 
-	@Operation(summary = "태그 목록 조회", description = "컨텐츠 카드와 추천 조건에 사용할 태그 목록을 조회합니다. 인증이 필요 없는 public API입니다.")
+	@Operation(summary = "태그 목록 조회", description = "컨텐츠 카드와 추천 조건에 사용할 태그 목록을 조회합니다. 인증이 필요 없는 공개 API입니다.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(
 					responseCode = "200",

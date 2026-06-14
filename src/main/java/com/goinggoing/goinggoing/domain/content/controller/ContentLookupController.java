@@ -22,7 +22,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/contents")
-@Tag(name = "Content", description = "대표 장소 컨텐츠 조회 API")
+@Tag(name = "컨텐츠 조회", description = "대표 장소 컨텐츠 목록, 상세, HOT 컨텐츠 조회 API")
 public class ContentLookupController {
 
 	private final ContentLookupService contentLookupService;
@@ -53,7 +53,7 @@ public class ContentLookupController {
 		return ResponseEntity.ok(ApiResponse.success(response, "컨텐츠 목록 조회가 완료되었습니다."));
 	}
 
-	@Operation(summary = "HOT 컨텐츠 조회", description = "조회수, 찜수, HOT 점수를 기준으로 상위 컨텐츠를 조회합니다. 인증이 필요 없는 public API입니다.")
+	@Operation(summary = "HOT 컨텐츠 조회", description = "조회수, 찜수, HOT 점수를 기준으로 상위 컨텐츠를 조회합니다. 인증이 필요 없는 공개 API입니다.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(
 					responseCode = "200",
@@ -68,7 +68,7 @@ public class ContentLookupController {
 		return ResponseEntity.ok(ApiResponse.success(response, "HOT 컨텐츠 조회가 완료되었습니다."));
 	}
 
-	@Operation(summary = "컨텐츠 상세 조회", description = "대표 장소 상세 정보, 카드뉴스, 태그를 조회하고 조회수를 1 증가시킵니다. 인증이 필요 없는 public API입니다.")
+	@Operation(summary = "컨텐츠 상세 조회", description = "대표 장소 상세 정보, 카드뉴스, 태그를 조회하고 조회수를 1 증가시킵니다. 인증이 필요 없는 공개 API입니다.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(
 					responseCode = "200",

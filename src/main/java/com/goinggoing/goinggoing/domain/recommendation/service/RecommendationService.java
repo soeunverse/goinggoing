@@ -33,7 +33,7 @@ public class RecommendationService {
 	}
 
 	public List<ContentSummaryResponse> getFeed(Long userId) {
-		// 비로그인 HOT fallback
+		// 비로그인 HOT 기본 추천
 		if (userId == null) {
 			return hotFallback(FEED_LIMIT);
 		}
@@ -90,7 +90,7 @@ public class RecommendationService {
 	}
 
 	private List<ContentSummaryResponse> hotFallback(int limit) {
-		// HOT fallback 응답 생성
+		// HOT 기본 추천 응답 생성
 		return contentRepository.findHotContents()
 				.stream()
 				.limit(limit)

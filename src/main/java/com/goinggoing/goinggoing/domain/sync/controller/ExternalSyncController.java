@@ -23,7 +23,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/sync")
-@Tag(name = "External Sync", description = "ADMIN 전용 공공데이터 동기화 API")
+@Tag(name = "외부 데이터 동기화", description = "관리자 전용 한국관광공사 공공데이터 동기화 API")
 public class ExternalSyncController {
 
 	private final ExternalSyncService externalSyncService;
@@ -39,14 +39,14 @@ public class ExternalSyncController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "컨텐츠 동기화 실행 완료", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "UNAUTHORIZED: 인증 헤더 누락 또는 비활성 사용자", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "FORBIDDEN: ADMIN 권한 없음", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "FORBIDDEN: 관리자 권한 없음", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
 	})
 	@PostMapping("/contents")
 	public ResponseEntity<ApiResponse<ExternalSyncResponse>> syncContents(
 			@Parameter(hidden = true)
 			@RequestHeader("Authorization") String authorizationHeader
 	) {
-		// ADMIN 인증 처리
+		// 관리자 인증 처리
 		Long adminUserId = currentUserExtractor.extractUserId(authorizationHeader);
 		// 컨텐츠 동기화 실행
 		ExternalSyncResponse response = externalSyncService.syncContents(adminUserId);
@@ -58,14 +58,14 @@ public class ExternalSyncController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "연관 관광지 동기화 실행 완료", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "UNAUTHORIZED: 인증 헤더 누락 또는 비활성 사용자", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "FORBIDDEN: ADMIN 권한 없음", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "FORBIDDEN: 관리자 권한 없음", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
 	})
 	@PostMapping("/related-places")
 	public ResponseEntity<ApiResponse<ExternalSyncResponse>> syncRelatedPlaces(
 			@Parameter(hidden = true)
 			@RequestHeader("Authorization") String authorizationHeader
 	) {
-		// ADMIN 인증 처리
+		// 관리자 인증 처리
 		Long adminUserId = currentUserExtractor.extractUserId(authorizationHeader);
 		// 연관 관광지 동기화 실행
 		ExternalSyncResponse response = externalSyncService.syncRelatedPlaces(adminUserId);
@@ -77,14 +77,14 @@ public class ExternalSyncController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "지역수요 동기화 실행 완료", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "UNAUTHORIZED: 인증 헤더 누락 또는 비활성 사용자", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "FORBIDDEN: ADMIN 권한 없음", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "FORBIDDEN: 관리자 권한 없음", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
 	})
 	@PostMapping("/regional-demand")
 	public ResponseEntity<ApiResponse<ExternalSyncResponse>> syncRegionalDemand(
 			@Parameter(hidden = true)
 			@RequestHeader("Authorization") String authorizationHeader
 	) {
-		// ADMIN 인증 처리
+		// 관리자 인증 처리
 		Long adminUserId = currentUserExtractor.extractUserId(authorizationHeader);
 		// 지역수요 동기화 실행
 		ExternalSyncResponse response = externalSyncService.syncRegionalDemand(adminUserId);
@@ -96,14 +96,14 @@ public class ExternalSyncController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "동기화 로그 조회 성공", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "UNAUTHORIZED: 인증 헤더 누락 또는 비활성 사용자", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "FORBIDDEN: ADMIN 권한 없음", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "FORBIDDEN: 관리자 권한 없음", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
 	})
 	@GetMapping("/logs")
 	public ResponseEntity<ApiResponse<List<ExternalSyncLogResponse>>> getSyncLogs(
 			@Parameter(hidden = true)
 			@RequestHeader("Authorization") String authorizationHeader
 	) {
-		// ADMIN 인증 처리
+		// 관리자 인증 처리
 		Long adminUserId = currentUserExtractor.extractUserId(authorizationHeader);
 		// 동기화 로그 조회
 		List<ExternalSyncLogResponse> response = externalSyncService.getSyncLogs(adminUserId);

@@ -37,7 +37,7 @@ public class ExternalSyncService {
 
 	@Transactional
 	public ExternalSyncResponse syncContents(Long adminUserId) {
-		// ADMIN 권한 검증
+		// 관리자 권한 검증
 		adminAuthorizationService.validateAdmin(adminUserId);
 		// 컨텐츠 동기화 실행
 		return executeSync(ContentSourceType.KTO_TOUR_API, CONTENTS_ENDPOINT, externalDataSyncClient::syncContents);
@@ -45,7 +45,7 @@ public class ExternalSyncService {
 
 	@Transactional
 	public ExternalSyncResponse syncRelatedPlaces(Long adminUserId) {
-		// ADMIN 권한 검증
+		// 관리자 권한 검증
 		adminAuthorizationService.validateAdmin(adminUserId);
 		// 연관 관광지 동기화 실행
 		return executeSync(
@@ -57,7 +57,7 @@ public class ExternalSyncService {
 
 	@Transactional
 	public ExternalSyncResponse syncRegionalDemand(Long adminUserId) {
-		// ADMIN 권한 검증
+		// 관리자 권한 검증
 		adminAuthorizationService.validateAdmin(adminUserId);
 		// 지역수요 동기화 실행
 		return executeSync(
@@ -69,7 +69,7 @@ public class ExternalSyncService {
 
 	@Transactional(readOnly = true)
 	public List<ExternalSyncLogResponse> getSyncLogs(Long adminUserId) {
-		// ADMIN 권한 검증
+		// 관리자 권한 검증
 		adminAuthorizationService.validateAdmin(adminUserId);
 		// 동기화 로그 응답 생성
 		return externalSyncLogRepository.findAllByOrderByRequestedAtDesc()

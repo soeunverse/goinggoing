@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/contents")
-@Tag(name = "Content Admin", description = "ADMIN 전용 컨텐츠 관리 API")
+@Tag(name = "컨텐츠 관리", description = "관리자 전용 컨텐츠 생성, 수정, 삭제 API")
 public class ContentManagementController {
 
 	private final ContentManagementService contentManagementService;
@@ -38,7 +38,7 @@ public class ContentManagementController {
 		this.currentUserExtractor = currentUserExtractor;
 	}
 
-	@Operation(summary = "컨텐츠 생성", description = "ADMIN 사용자가 컨텐츠, 카드뉴스, 태그 연결을 생성합니다.")
+	@Operation(summary = "컨텐츠 생성", description = "관리자가 컨텐츠, 카드뉴스, 태그 연결을 생성합니다.")
 	@SecurityRequirement(name = "bearerAuth")
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(
 			description = "컨텐츠 생성 요청",
@@ -48,7 +48,7 @@ public class ContentManagementController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "컨텐츠 생성 성공", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "UNAUTHORIZED: 인증 헤더 누락 또는 비활성 사용자", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "FORBIDDEN: ADMIN 권한 없음", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "FORBIDDEN: 관리자 권한 없음", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "CATEGORY_NOT_FOUND: 지역/테마/태그 없음", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
 	})
 	@PostMapping
@@ -57,14 +57,14 @@ public class ContentManagementController {
 			@RequestHeader("Authorization") String authorizationHeader,
 			@RequestBody ContentManagementRequest request
 	) {
-		// ADMIN 인증 처리
+		// 관리자 인증 처리
 		Long adminUserId = currentUserExtractor.extractUserId(authorizationHeader);
 		// 컨텐츠 생성 처리
 		ContentDetailResponse response = contentManagementService.createContent(adminUserId, request);
 		return ResponseEntity.ok(ApiResponse.success(response, "컨텐츠 생성이 완료되었습니다."));
 	}
 
-	@Operation(summary = "컨텐츠 수정", description = "ADMIN 사용자가 컨텐츠 정보를 수정하고 카드뉴스/태그를 전체 교체합니다.")
+	@Operation(summary = "컨텐츠 수정", description = "관리자가 컨텐츠 정보를 수정하고 카드뉴스/태그를 전체 교체합니다.")
 	@SecurityRequirement(name = "bearerAuth")
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(
 			description = "컨텐츠 수정 요청",
@@ -74,7 +74,7 @@ public class ContentManagementController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "컨텐츠 수정 성공", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "UNAUTHORIZED: 인증 헤더 누락 또는 비활성 사용자", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "FORBIDDEN: ADMIN 권한 없음", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "FORBIDDEN: 관리자 권한 없음", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "CONTENT_NOT_FOUND 또는 CATEGORY_NOT_FOUND", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
 	})
 	@PutMapping("/{contentId}")
@@ -85,19 +85,19 @@ public class ContentManagementController {
 			@PathVariable Long contentId,
 			@RequestBody ContentManagementRequest request
 	) {
-		// ADMIN 인증 처리
+		// 관리자 인증 처리
 		Long adminUserId = currentUserExtractor.extractUserId(authorizationHeader);
 		// 컨텐츠 수정 처리
 		ContentDetailResponse response = contentManagementService.updateContent(adminUserId, contentId, request);
 		return ResponseEntity.ok(ApiResponse.success(response, "컨텐츠 수정이 완료되었습니다."));
 	}
 
-	@Operation(summary = "컨텐츠 삭제", description = "ADMIN 사용자가 컨텐츠를 soft delete 처리합니다. isPublished=false, deletedAt 설정으로 처리합니다.")
+	@Operation(summary = "컨텐츠 삭제", description = "관리자가 컨텐츠를 삭제 처리합니다. 공개 여부를 false로 바꾸고 삭제 시각을 저장합니다.")
 	@SecurityRequirement(name = "bearerAuth")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "컨텐츠 삭제 성공", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "UNAUTHORIZED: 인증 헤더 누락 또는 비활성 사용자", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "FORBIDDEN: ADMIN 권한 없음", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "FORBIDDEN: 관리자 권한 없음", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "CONTENT_NOT_FOUND: 컨텐츠 없음", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
 	})
 	@DeleteMapping("/{contentId}")
@@ -107,7 +107,7 @@ public class ContentManagementController {
 			@Parameter(description = "컨텐츠 ID", example = "1")
 			@PathVariable Long contentId
 	) {
-		// ADMIN 인증 처리
+		// 관리자 인증 처리
 		Long adminUserId = currentUserExtractor.extractUserId(authorizationHeader);
 		// 컨텐츠 삭제 처리
 		contentManagementService.deleteContent(adminUserId, contentId);

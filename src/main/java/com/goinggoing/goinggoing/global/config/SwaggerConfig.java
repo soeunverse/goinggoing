@@ -21,7 +21,7 @@ public class SwaggerConfig {
 								.bearerFormat("JWT")
 								.description("로그인 API에서 받은 accessToken을 입력하세요.")))
 				.info(new Info()
-						.title("GoingGoing API")
+						.title("고잉고잉 API")
 						.description("당일치기 및 1박 2일 여행 컨텐츠 추천 서비스 API")
 						.version("v1"));
 	}

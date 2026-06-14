@@ -23,7 +23,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/routes")
-@Tag(name = "Route", description = "당일치기 및 1박 2일 루트 API")
+@Tag(name = "루트", description = "당일치기 및 1박 2일 추천 루트 생성, 상세, 지역별 조회 API")
 public class RouteController {
 
 	private final RouteService routeService;

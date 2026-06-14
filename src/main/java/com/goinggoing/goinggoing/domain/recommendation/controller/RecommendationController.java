@@ -24,7 +24,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/recommendations")
-@Tag(name = "Recommendation", description = "컨텐츠 추천 API")
+@Tag(name = "추천", description = "피드, 연관 컨텐츠, 룰렛 후보 추천 API")
 public class RecommendationController {
 
 	private final RecommendationService recommendationService;
@@ -35,7 +35,7 @@ public class RecommendationController {
 		this.currentUserExtractor = currentUserExtractor;
 	}
 
-	@Operation(summary = "피드 추천", description = "Authorization 헤더가 있으면 온보딩 취향 기반으로 추천하고, 없거나 취향이 없으면 HOT 컨텐츠로 fallback합니다.")
+	@Operation(summary = "피드 추천", description = "Authorization 헤더가 있으면 온보딩 취향 기반으로 추천하고, 없거나 취향이 없으면 HOT 컨텐츠를 기본 추천으로 반환합니다.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(
 					responseCode = "200",
@@ -45,7 +45,7 @@ public class RecommendationController {
 	})
 	@GetMapping("/feed")
 	public ResponseEntity<ApiResponse<List<ContentSummaryResponse>>> getFeed(
-			@Parameter(description = "선택 인증 헤더. 입력하면 개인화 추천, 없으면 HOT fallback", example = "Bearer access-token")
+			@Parameter(description = "선택 인증 헤더. 입력하면 개인화 추천, 없으면 HOT 컨텐츠 추천", example = "Bearer access-token")
 			@RequestHeader(value = "Authorization", required = false) String authorizationHeader
 	) {
 		// 선택 인증 처리

@@ -27,7 +27,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookmarks")
-@Tag(name = "Bookmark", description = "로그인 사용자의 찜 API")
+@Tag(name = "찜", description = "로그인 사용자의 컨텐츠 찜 조회, 추가, 삭제 API")
 public class BookmarkController {
 
 	private final BookmarkService bookmarkService;

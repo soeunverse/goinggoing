@@ -26,7 +26,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/search")
-@Tag(name = "Search", description = "컨텐츠 검색 API")
+@Tag(name = "검색", description = "키워드 검색, 필터 검색, 인기/최근 검색어 조회 API")
 public class SearchController {
 
 	private final SearchService searchService;
@@ -37,7 +37,7 @@ public class SearchController {
 		this.currentUserExtractor = currentUserExtractor;
 	}
 
-	@Operation(summary = "키워드 검색", description = "제목, 요약, 주소, 태그 기준으로 공개 컨텐츠를 검색합니다. 인증이 필요 없는 public API입니다.")
+	@Operation(summary = "키워드 검색", description = "제목, 요약, 주소, 태그 기준으로 공개 컨텐츠를 검색합니다. 인증이 필요 없는 공개 API입니다.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(
 					responseCode = "200",
@@ -60,7 +60,7 @@ public class SearchController {
 		return ResponseEntity.ok(ApiResponse.success(response, "키워드 검색이 완료되었습니다."));
 	}
 
-	@Operation(summary = "필터 검색", description = "지역, 테마, 하위 카테고리, 컨텐츠 유형, 태그 조건을 AND 조건으로 검색합니다. 인증이 필요 없는 public API입니다.")
+	@Operation(summary = "필터 검색", description = "지역, 테마, 하위 카테고리, 컨텐츠 유형, 태그 조건을 AND 조건으로 검색합니다. 인증이 필요 없는 공개 API입니다.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(
 					responseCode = "200",
@@ -88,7 +88,7 @@ public class SearchController {
 		return ResponseEntity.ok(ApiResponse.success(response, "필터 검색이 완료되었습니다."));
 	}
 
-	@Operation(summary = "인기 검색어 조회", description = "전체 검색 로그 누적 횟수 기준 상위 검색어를 조회합니다. 인증이 필요 없는 public API입니다.")
+	@Operation(summary = "인기 검색어 조회", description = "전체 검색 로그 누적 횟수 기준 상위 검색어를 조회합니다. 인증이 필요 없는 공개 API입니다.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(
 					responseCode = "200",

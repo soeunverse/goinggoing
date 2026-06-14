@@ -54,14 +54,14 @@ public class ContentManagementService {
 
 	@Transactional
 	public ContentDetailResponse createContent(Long adminUserId, ContentManagementRequest request) {
-		// ADMIN 권한 검증
+		// 관리자 권한 검증
 		validateAdmin(adminUserId);
 		// 카테고리 값 조회
 		CategoryValues categoryValues = resolveCategories(request);
 		// 태그 값 조회
 		List<Tag> tags = resolveTags(request.tagIds());
 
-		// ADMIN 컨텐츠 생성
+		// 관리자 컨텐츠 생성
 		Content content = Content.createAdminContent(
 				categoryValues.region(),
 				categoryValues.theme(),
@@ -85,7 +85,7 @@ public class ContentManagementService {
 
 	@Transactional
 	public ContentDetailResponse updateContent(Long adminUserId, Long contentId, ContentManagementRequest request) {
-		// ADMIN 권한 검증
+		// 관리자 권한 검증
 		validateAdmin(adminUserId);
 		// 컨텐츠 조회
 		Content content = contentRepository.findById(contentId)
@@ -119,7 +119,7 @@ public class ContentManagementService {
 
 	@Transactional
 	public void deleteContent(Long adminUserId, Long contentId) {
-		// ADMIN 권한 검증
+		// 관리자 권한 검증
 		validateAdmin(adminUserId);
 		// 컨텐츠 조회
 		Content content = contentRepository.findById(contentId)
