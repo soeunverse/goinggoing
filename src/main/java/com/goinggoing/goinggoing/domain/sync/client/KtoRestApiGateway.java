@@ -2,6 +2,7 @@ package com.goinggoing.goinggoing.domain.sync.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Component
 @ConditionalOnProperty(name = "kto.sync.enabled", havingValue = "true")
 public class KtoRestApiGateway implements KtoApiGateway {
@@ -44,7 +46,9 @@ public class KtoRestApiGateway implements KtoApiGateway {
 				.uri(uriBuilder -> buildUri(uriBuilder, endpoint, queryParameters))
 				.retrieve()
 				.body(String.class);
-		return extractItems(responseBody);
+		List<JsonNode> items = extractItems(responseBody);
+		log.info("[KTO 응답] endpoint={} params={} itemCount={}", endpoint, maskServiceKey(queryParameters), items.size());
+		return items;
 	}
 
 	private URI buildUri(UriBuilder uriBuilder, KtoEndpoint endpoint, Map<String, String> queryParameters) {
@@ -94,6 +98,14 @@ public class KtoRestApiGateway implements KtoApiGateway {
 	private List<JsonNode> extractItems(String responseBody) {
 		try {
 			JsonNode root = objectMapper.readTree(responseBody);
+			JsonNode header = root.path("response").path("header");
+			if (!header.isMissingNode()) {
+				String resultCode = header.path("resultCode").asText();
+				String resultMessage = header.path("resultMsg").asText();
+				if (!resultCode.isBlank() && !"0000".equals(resultCode)) {
+					log.warn("[KTO 오류 응답] resultCode={} resultMessage={}", resultCode, resultMessage);
+				}
+			}
 			JsonNode itemNode = root.path("response").path("body").path("items").path("item");
 			if (itemNode.isMissingNode()) {
 				itemNode = root.path("body").path("items").path("item");
@@ -113,5 +125,9 @@ public class KtoRestApiGateway implements KtoApiGateway {
 		} catch (Exception exception) {
 			throw new IllegalStateException("한국관광공사 API 응답 파싱에 실패했습니다.", exception);
 		}
+	}
+
+	private Map<String, String> maskServiceKey(Map<String, String> queryParameters) {
+		return queryParameters;
 	}
 }
