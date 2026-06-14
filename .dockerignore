@@ -1,0 +1,14 @@
+.git
+.gradle
+.idea
+.devcontainer
+build
+out
+*.iml
+.DS_Store
+
+src/main/resources/application.properties
+
+docs
+README.md
+HELP.md

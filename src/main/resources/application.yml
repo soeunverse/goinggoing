@@ -49,3 +49,6 @@ kto:
     base-url: ${KTO_REGIONAL_DEMAND_BASE_URL:https://apis.data.go.kr/B551011/AreaTarResDemService}
   related-place:
     base-url: ${KTO_RELATED_PLACE_BASE_URL:https://apis.data.go.kr/B551011/TarRlteTarService1}
+
+server:
+  port: ${PORT:8080}
