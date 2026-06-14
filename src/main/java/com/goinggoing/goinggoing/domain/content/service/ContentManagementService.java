@@ -20,12 +20,14 @@ import com.goinggoing.goinggoing.domain.user.entity.User;
 import com.goinggoing.goinggoing.domain.user.repository.UserRepository;
 import com.goinggoing.goinggoing.global.exception.BusinessException;
 import com.goinggoing.goinggoing.global.exception.ErrorCode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 public class ContentManagementService {
 
@@ -80,7 +82,9 @@ public class ContentManagementService {
 		content.replaceCards(toCards(content, request.cards()));
 		content.replaceTags(tags);
 
-		return toDetailResponse(contentRepository.save(content));
+		Content savedContent = contentRepository.save(content);
+		log.info("[DB 저장] 컨텐츠 생성 adminUserId={} contentId={} title={} cardCount={} tagCount={}", adminUserId, savedContent.getId(), savedContent.getTitle(), savedContent.getCards().size(), savedContent.getTags().size());
+		return toDetailResponse(savedContent);
 	}
 
 	@Transactional
@@ -113,6 +117,7 @@ public class ContentManagementService {
 		// 카드와 태그 전체 교체
 		content.replaceCards(toCards(content, request.cards()));
 		content.replaceTags(tags);
+		log.info("[DB 수정] 컨텐츠 수정 adminUserId={} contentId={} title={} cardCount={} tagCount={}", adminUserId, content.getId(), content.getTitle(), content.getCards().size(), content.getTags().size());
 
 		return toDetailResponse(content);
 	}
@@ -126,6 +131,7 @@ public class ContentManagementService {
 				.orElseThrow(() -> new BusinessException(ErrorCode.CONTENT_NOT_FOUND));
 		// soft delete 처리
 		content.softDelete(LocalDateTime.now());
+		log.info("[DB 수정] 컨텐츠 삭제 처리 adminUserId={} contentId={} published={} deletedAt={}", adminUserId, content.getId(), content.isPublished(), content.getDeletedAt());
 	}
 
 	private void validateAdmin(Long adminUserId) {

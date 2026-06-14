@@ -9,11 +9,13 @@ import com.goinggoing.goinggoing.domain.user.entity.User;
 import com.goinggoing.goinggoing.domain.user.repository.UserRepository;
 import com.goinggoing.goinggoing.global.exception.BusinessException;
 import com.goinggoing.goinggoing.global.exception.ErrorCode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class BookmarkService {
 
@@ -59,6 +61,7 @@ public class BookmarkService {
 		// 찜수 증가
 		content.increaseBookmarkCount();
 		Bookmark bookmark = bookmarkRepository.save(Bookmark.create(user, content));
+		log.info("[DB 저장] 찜 추가 userId={} contentId={} bookmarkId={} bookmarkCount={}", userId, contentId, bookmark.getId(), content.getBookmarkCount());
 
 		return toResponse(bookmark);
 	}
@@ -74,6 +77,7 @@ public class BookmarkService {
 		// 찜수 감소
 		bookmark.getContent().decreaseBookmarkCount();
 		bookmarkRepository.delete(bookmark);
+		log.info("[DB 삭제] 찜 삭제 userId={} contentId={} bookmarkId={} bookmarkCount={}", userId, bookmark.getContent().getId(), bookmarkId, bookmark.getContent().getBookmarkCount());
 	}
 
 	@Transactional
@@ -86,6 +90,7 @@ public class BookmarkService {
 		// 찜수 일괄 감소
 		bookmarks.forEach(bookmark -> bookmark.getContent().decreaseBookmarkCount());
 		bookmarkRepository.deleteAll(bookmarks);
+		log.info("[DB 삭제] 찜 일괄 삭제 userId={} requestedCount={} deletedCount={}", userId, bookmarkIds.size(), bookmarks.size());
 	}
 
 	private User validateActiveUser(Long userId) {

@@ -11,6 +11,7 @@ import com.goinggoing.goinggoing.domain.user.repository.UserRepository;
 import com.goinggoing.goinggoing.global.exception.BusinessException;
 import com.goinggoing.goinggoing.global.exception.ErrorCode;
 import com.goinggoing.goinggoing.global.security.AuthTokenProvider;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 @Transactional
 public class AuthSessionService {
@@ -65,7 +67,9 @@ public class AuthSessionService {
 			throw new BusinessException(ErrorCode.UNAUTHORIZED);
 		}
 
-		return issueTokenPair(user);
+		AuthTokenResponse response = issueTokenPair(user);
+		log.info("[DB 저장] 로그인 토큰 발급 userId={} email={}", user.getId(), user.getEmail());
+		return response;
 	}
 
 	public AuthTokenResponse refresh(RefreshTokenRequest request) {
@@ -73,8 +77,11 @@ public class AuthSessionService {
 		RefreshToken refreshToken = findAvailableRefreshToken(request.refreshToken());
 		// 기존 refresh token 폐기
 		refreshToken.revoke(now());
+		log.info("[DB 수정] refresh token 폐기 userId={} refreshTokenId={}", refreshToken.getUser().getId(), refreshToken.getId());
 
-		return issueTokenPair(refreshToken.getUser());
+		AuthTokenResponse response = issueTokenPair(refreshToken.getUser());
+		log.info("[DB 저장] 토큰 갱신 완료 userId={}", refreshToken.getUser().getId());
+		return response;
 	}
 
 	public void logout(LogoutRequest request) {
@@ -82,6 +89,7 @@ public class AuthSessionService {
 		RefreshToken refreshToken = findAvailableRefreshToken(request.refreshToken());
 		// refresh token 폐기 처리
 		refreshToken.revoke(now());
+		log.info("[DB 수정] 로그아웃 refresh token 폐기 userId={} refreshTokenId={}", refreshToken.getUser().getId(), refreshToken.getId());
 	}
 
 	private AuthTokenResponse issueTokenPair(User user) {
@@ -89,7 +97,8 @@ public class AuthSessionService {
 		String accessToken = authTokenProvider.generateAccessToken(user.getId(), now().plusSeconds(accessTokenExpiresInSeconds));
 		String refreshToken = authTokenProvider.generateRefreshToken();
 		// refresh token 저장
-		refreshTokenRepository.save(RefreshToken.issue(user, refreshToken, now().plusDays(refreshTokenExpiresInDays)));
+		RefreshToken savedRefreshToken = refreshTokenRepository.save(RefreshToken.issue(user, refreshToken, now().plusDays(refreshTokenExpiresInDays)));
+		log.info("[DB 저장] refresh token 저장 userId={} refreshTokenId={} expiresInDays={}", user.getId(), savedRefreshToken.getId(), refreshTokenExpiresInDays);
 
 		return new AuthTokenResponse(
 				user.getId(),

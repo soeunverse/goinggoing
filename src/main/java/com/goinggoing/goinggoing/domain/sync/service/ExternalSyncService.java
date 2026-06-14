@@ -8,12 +8,14 @@ import com.goinggoing.goinggoing.domain.sync.dto.ExternalSyncResponse;
 import com.goinggoing.goinggoing.domain.sync.entity.ExternalSyncLog;
 import com.goinggoing.goinggoing.domain.sync.repository.ExternalSyncLogRepository;
 import com.goinggoing.goinggoing.domain.user.service.AdminAuthorizationService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.function.Supplier;
 
+@Slf4j
 @Service
 public class ExternalSyncService {
 
@@ -83,12 +85,12 @@ public class ExternalSyncService {
 			String endpoint,
 			Supplier<ExternalSyncResult> syncSupplier
 	) {
-		ExternalSyncLog log;
+		ExternalSyncLog syncLog;
 		try {
 			// 외부 client 실행
 			ExternalSyncResult result = syncSupplier.get();
 			// 성공/부분성공 로그 생성
-			log = ExternalSyncLog.success(
+			syncLog = ExternalSyncLog.success(
 					sourceType,
 					endpoint,
 					result.importedCount(),
@@ -97,10 +99,19 @@ public class ExternalSyncService {
 			);
 		} catch (RuntimeException exception) {
 			// 실패 로그 생성
-			log = ExternalSyncLog.failed(sourceType, endpoint, exception.getMessage());
+			syncLog = ExternalSyncLog.failed(sourceType, endpoint, exception.getMessage());
 		}
 		// 로그 저장 후 응답 생성
-		return toResponse(externalSyncLogRepository.save(log));
+		ExternalSyncLog savedLog = externalSyncLogRepository.save(syncLog);
+		log.info(
+				"[DB 저장] 외부 동기화 로그 저장 syncLogId={} sourceType={} status={} importedCount={} failedCount={}",
+				savedLog.getId(),
+				savedLog.getSourceType(),
+				savedLog.getStatus(),
+				savedLog.getImportedCount(),
+				savedLog.getFailedCount()
+		);
+		return toResponse(savedLog);
 	}
 
 	private ExternalSyncResponse toResponse(ExternalSyncLog log) {

@@ -11,12 +11,14 @@ import com.goinggoing.goinggoing.domain.content.entity.ContentType;
 import com.goinggoing.goinggoing.domain.content.repository.ContentRepository;
 import com.goinggoing.goinggoing.global.exception.BusinessException;
 import com.goinggoing.goinggoing.global.exception.ErrorCode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
 
+@Slf4j
 @Service
 public class ContentLookupService {
 
@@ -46,6 +48,7 @@ public class ContentLookupService {
 
 		// 조회수 증가
 		content.increaseViewCount();
+		log.info("[DB 수정] 컨텐츠 조회수 증가 contentId={} viewCount={}", content.getId(), content.getViewCount());
 
 		// 상세 응답 생성
 		return toDetailResponse(content);

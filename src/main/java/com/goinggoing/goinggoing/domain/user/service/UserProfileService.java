@@ -6,9 +6,11 @@ import com.goinggoing.goinggoing.domain.user.entity.User;
 import com.goinggoing.goinggoing.domain.user.repository.UserRepository;
 import com.goinggoing.goinggoing.global.exception.BusinessException;
 import com.goinggoing.goinggoing.global.exception.ErrorCode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class UserProfileService {
@@ -47,6 +49,7 @@ public class UserProfileService {
 
 		// 닉네임 변경
 		user.updateNickname(request.nickname().trim());
+		log.info("[DB 수정] 내 정보 수정 userId={} nickname={}", user.getId(), user.getNickname());
 
 		// 수정 결과 응답 생성
 		return toProfileResponse(user);
@@ -58,6 +61,7 @@ public class UserProfileService {
 		User user = getActiveUser(userId);
 		// soft delete 처리
 		user.withdraw();
+		log.info("[DB 수정] 회원 탈퇴 userId={} status={}", user.getId(), user.getStatus());
 	}
 
 	private void validateNickname(String nickname) {

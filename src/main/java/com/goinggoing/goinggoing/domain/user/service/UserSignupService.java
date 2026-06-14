@@ -6,9 +6,11 @@ import com.goinggoing.goinggoing.domain.user.entity.User;
 import com.goinggoing.goinggoing.domain.user.repository.UserRepository;
 import com.goinggoing.goinggoing.global.exception.BusinessException;
 import com.goinggoing.goinggoing.global.exception.ErrorCode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class UserSignupService {
 
@@ -33,6 +35,7 @@ public class UserSignupService {
 		String passwordHash = passwordEncoder.encode(request.password());
 		User user = User.create(request.email(), passwordHash, request.nickname().trim());
 		User savedUser = userRepository.save(user);
+		log.info("[DB 저장] 회원가입 userId={} email={} nickname={}", savedUser.getId(), savedUser.getEmail(), savedUser.getNickname());
 
 		// 회원가입 응답 생성
 		return new UserSignupResponse(savedUser.getId(), savedUser.getEmail(), savedUser.getNickname());

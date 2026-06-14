@@ -13,12 +13,14 @@ import com.goinggoing.goinggoing.domain.user.entity.User;
 import com.goinggoing.goinggoing.domain.user.repository.UserRepository;
 import com.goinggoing.goinggoing.global.exception.BusinessException;
 import com.goinggoing.goinggoing.global.exception.ErrorCode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
 
+@Slf4j
 @Service
 public class SearchService {
 
@@ -48,7 +50,8 @@ public class SearchService {
 
 		// 검색 로그 저장
 		User user = findUserOrNull(userId);
-		searchLogRepository.save(SearchLog.create(user, normalizedKeyword, contents.size()));
+		SearchLog searchLog = searchLogRepository.save(SearchLog.create(user, normalizedKeyword, contents.size()));
+		log.info("[DB 저장] 검색 로그 저장 searchLogId={} userId={} keyword={} resultCount={}", searchLog == null ? null : searchLog.getId(), user == null ? null : user.getId(), normalizedKeyword, contents.size());
 
 		// 검색 결과 응답 생성
 		return contents.stream()

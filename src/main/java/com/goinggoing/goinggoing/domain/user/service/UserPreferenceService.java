@@ -8,11 +8,13 @@ import com.goinggoing.goinggoing.domain.user.repository.UserPreferenceRepository
 import com.goinggoing.goinggoing.domain.user.repository.UserRepository;
 import com.goinggoing.goinggoing.global.exception.BusinessException;
 import com.goinggoing.goinggoing.global.exception.ErrorCode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class UserPreferenceService {
@@ -54,7 +56,17 @@ public class UserPreferenceService {
 		preference.replace(request.preferredTripDuration(), request.regionIds(), request.themeIds(), request.tagIds());
 
 		// 저장 결과 응답 생성
-		return toResponse(userPreferenceRepository.save(preference));
+		UserPreference savedPreference = userPreferenceRepository.save(preference);
+		log.info(
+				"[DB 저장] 온보딩 취향 저장 userId={} preferenceId={} regionCount={} themeCount={} tagCount={} duration={}",
+				user.getId(),
+				savedPreference.getId(),
+				savedPreference.getRegionIds().size(),
+				savedPreference.getThemeIds().size(),
+				savedPreference.getTagIds().size(),
+				savedPreference.getPreferredTripDuration()
+		);
+		return toResponse(savedPreference);
 	}
 
 	private void validateRequest(UserPreferenceRequest request) {
