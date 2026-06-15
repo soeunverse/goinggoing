@@ -16,7 +16,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
 	public WebMvcConfig(
 			ApiLoggingInterceptor apiLoggingInterceptor,
-			@Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173,http://localhost:8081,http://localhost:19006}") String allowedOrigins
+			@Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173,http://localhost:8081,http://localhost:19006,https://glorious-parakeet-74xvg7j9vrj2r9gx-5173.app.github.dev}") String allowedOrigins
 	) {
 		this.apiLoggingInterceptor = apiLoggingInterceptor;
 		this.allowedOrigins = Arrays.stream(allowedOrigins.split(","))
